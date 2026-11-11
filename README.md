@@ -1,27 +1,66 @@
 # Network Programming
 
-《网络编程》期末课程项目｜四人小组
+《网络编程》期末课程项目，澳门科技大学四人本科小组。
 
-## 当前候选题
+**基于 UDP 的可靠文件传输协议设计与弱网性能评估**
 
-**基于自定义 TCP 协议的发布／订阅消息系统**。目前处于选题与设计阶段，等小组确认后再进入实现。
+Reliable UDP File Transfer and Network Performance Evaluation
 
-## 第一版计划
+## 当前状态
 
-- 一个服务端管理多个 TCP 客户端，按主题将消息转发给订阅者。
-- 自定义消息帧包含类型和长度，支持从 TCP 字节流解析完整消息。
-- 订阅端用固定客户端 ID 重连。服务端在运行期间保留未确认消息，重连后补发，订阅端按消息编号去重。
-- 限制待确认队列的大小，并让队列达到上限时的处理结果可观察。
+2026-11-11 已确定方向、分工和第一版计划，提供最小 UDP 双向通信示例与检查脚本。文件传输、滑动窗口、流量控制和拥塞控制均待开发。
 
-## 四人分工草案
+目标申报 1.40 档，最终由老师认定。老师详细要求尚未发布，后续据此调整范围和验收标准。
 
-| 模块 | 主要工作 |
-| --- | --- |
-| 协议与通信 | 消息帧、编码与解析、异常输入处理 |
-| 服务端 | 多连接、主题订阅、消息路由、队列管理 |
-| 客户端 | 发布、订阅、确认、重连和去重 |
-| 集成与测试 | 故障场景、可重复的验证脚本和演示流程 |
+**内部截止为 2026-11-17 23:59，时区 Asia/Shanghai，2026-11-18 可演示。** 老师正式截止时间待确认。
 
-## 验收计划
+## 第一版目标
 
-启动一个发布端与两个订阅端，分别订阅 `temperature` 和 `alerts`。断开告警订阅端，发布三条告警，再用原客户端 ID 重连。检查告警端补收三条消息，温度端未收到告警。另测确认未送达时的重复补发，以及慢订阅者触发队列上限的行为。
+- 自定义报文、文件分片、ACK、超时重传、乱序重组、重复包处理。
+- 滑动窗口、有限接收缓存与接收端流量控制。
+- RTT 估计、自适应重传超时、基础慢启动、拥塞避免和丢包后的窗口收缩。
+- 结束确认重试、有限失败等待、明确的成功或失败结果。
+- SHA-256 文件一致性验证与弱网性能评估。
+
+## 四人分工
+
+| 成员 | 环境 | 主责 |
+| --- | --- | --- |
+| [haohao0803](https://github.com/haohao0803) | Windows / WSL 2 Ubuntu | 发送端、发送窗口、ACK 处理、重传调度、项目集成 |
+| [Clive-111](https://github.com/Clive-111) | Windows / WSL 2 Ubuntu | 接收端、乱序缓存、去重、文件重组、流量控制 |
+| [LPCAQ](https://github.com/LPCAQ) | Windows / WSL 2 Ubuntu | RTT/RTO、拥塞控制、参数日志 |
+| [bushi510](https://github.com/bushi510) | macOS | 测试工具、实验自动化、图表、Mac 兼容性验证 |
+
+协议由全组确认。弱网实验由 bushi510 编排，在验证通过的 Linux 环境执行，haohao0803 配合提供环境。
+
+## 开始开发
+
+核心计划采用 C11、POSIX Socket 和 Make，实验工具使用 Python 3。Windows 在 WSL 2 Ubuntu 内操作，Mac 使用 Command Line Tools 的编译工具。
+
+```sh
+git clone https://github.com/haohao0803/network-programming.git
+cd network-programming
+make
+make check
+```
+
+手动运行时，先在一个终端启动接收端，再在另一终端发送。
+
+```sh
+./build/udp-probe listen 19090
+./build/udp-probe send 127.0.0.1 19090
+```
+
+当前示例只验证本机 UDP 双向收发，监听 127.0.0.1，等待上限 10 秒，接收一次后退出。文件传输 CLI 在后续联调中补充。
+
+## 开发资料
+
+- [分工、每日计划与验收](docs/PLAN.md)
+- [协议草案与接口讨论](docs/PROTOCOL.md)
+- [Windows / Mac 环境及协作流程](docs/DEVELOPMENT.md)
+
+## 参考资料
+
+- [Microsoft WSL 版本说明](https://learn.microsoft.com/en-us/windows/wsl/compare-versions)
+- [IETF UDP 使用指南 RFC 8085](https://www.rfc-editor.org/rfc/rfc8085.html)
+- [Linux netem 手册](https://man7.org/linux/man-pages/man8/tc-netem.8.html)
