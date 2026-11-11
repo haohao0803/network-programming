@@ -55,9 +55,12 @@ make check
 
 ## 开发资料
 
+- [小型 Ubuntu / Debian 服务器部署](docs/SERVER.md)
 - [分工、每日计划与验收](docs/PLAN.md)
 - [协议草案与接口讨论](docs/PROTOCOL.md)
 - [Windows / Mac 环境及协作流程](docs/DEVELOPMENT.md)
+
+统一实验环境计划使用组员提供的 Linux 服务器。服务器所有者按部署说明安装工具，并执行默认网络与隔离网络检查。各成员仍可在 WSL / Mac 开发和验证自己的模块。
 
 ## 参考资料
 
