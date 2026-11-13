@@ -28,6 +28,10 @@ make check
 
 ## Mac 成员 bushi510
 
+2026-11-13 实际 Mac 构建、协议测试和真实收发验证已完成，详见
+[日志与结果](progress/2026-11-13-mac.md)。本实验分支已修复严格 POSIX 模式下
+Darwin 隐藏 `MSG_DONTWAIT` 的兼容问题，并统一两端构建入口。
+
 安装 Apple Command Line Tools，确认 Python 3、Git、Clang 和 Make 可用。
 
 ```sh

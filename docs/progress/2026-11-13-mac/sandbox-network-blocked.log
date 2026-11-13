@@ -1,0 +1,21 @@
+$ make clean
+rm -f build/udp-probe build/rudp-send build/rudp-recv
+exit=0
+$ make CFLAGS=-std=c11 -Wall -Wextra -Wpedantic -Werror -O2
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/udp_probe.c  -o build/udp-probe
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/sender.c  -o build/rudp-send
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/receiver.c  -o build/rudp-recv
+exit=0
+$ make check
+python3 scripts/check_probe.py ./build/udp-probe
+Traceback (most recent call last):
+  File "/Users/wangzongyan/Documents/网络编程/network-programming/scripts/check_probe.py", line 65, in <module>
+    main()
+  File "/Users/wangzongyan/Documents/网络编程/network-programming/scripts/check_probe.py", line 14, in main
+    port_picker.bind(("127.0.0.1", 0))
+PermissionError: [Errno 1] Operation not permitted
+make: *** [check-probe] Error 1
+exit=2

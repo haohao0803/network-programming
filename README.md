@@ -8,7 +8,7 @@ Reliable UDP File Transfer and Network Performance Evaluation
 
 ## 当前状态
 
-当前功能分支提供停止等待与固定滑动窗口发送端：分片、累计 ACK、超时回退重传、接收窗口约束、零窗口探测及明确退出结果。自动测试用专用模拟对端验证文件哈希与异常情况；组员正式接收端联调、自适应超时和拥塞控制仍待完成。详见 [11 月 13 日进度](docs/progress/2026-11-13.md) 和 [窗口开发记录](docs/progress/2026-11-13-window.md)。
+本实验分支整合停止等待/固定窗口发送端与 Clive 的正式接收端，已在 Mac 完成严格 C11 构建、双方协议测试和 31 个真实两端联调场景。提供测试文件、SHA-256 校验、批量实验与结果汇总工具。自适应超时/拥塞模块、实际 Linux 服务器和跨机器验证仍待完成。见 [Mac 实测记录](docs/progress/2026-11-13-mac.md) 和 [实验复跑说明](docs/EXPERIMENTS.md)。
 
 目标申报 1.40 档，最终由老师认定。已收到用户提供的汇报要求截图，落实方式见 [汇报要求记录](docs/PRESENTATION.md)；正式截止时间仍待确认。
 
@@ -42,6 +42,7 @@ git clone https://github.com/haohao0803/network-programming.git
 cd network-programming
 make
 make check
+make check-integration
 ```
 
 手动运行时，先在一个终端启动接收端，再在另一终端发送。
@@ -69,6 +70,8 @@ make check
 
 ## 开发资料
 
+- [实验工具、文件哈希与 Mac 验证](docs/EXPERIMENTS.md)
+- [正式接收端运行说明](docs/RECEIVER.md)
 - [小型 Ubuntu / Debian 服务器部署](docs/SERVER.md)
 - [分工、每日计划与验收](docs/PLAN.md)
 - [协议草案与接口讨论](docs/PROTOCOL.md)

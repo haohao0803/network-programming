@@ -1,0 +1,20 @@
+$ make clean
+rm -f build/udp-probe build/rudp-send build/rudp-recv
+exit=0
+$ make CFLAGS=-std=c11 -Wall -Wextra -Wpedantic -Werror -O2
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/udp_probe.c  -o build/udp-probe
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/sender.c  -o build/rudp-send
+src/sender.c:83:55: error: use of undeclared identifier 'MSG_DONTWAIT'
+   83 |             ssize_t n = recv(fd, reply, sizeof reply, MSG_DONTWAIT);
+      |                                                       ^~~~~~~~~~~~
+src/sender.c:114:42: error: use of undeclared identifier 'MSG_DONTWAIT'
+  114 |     do { sent = send(fd, packet, length, MSG_DONTWAIT); } while (sent < 0 && errno == EINTR);
+      |                                          ^~~~~~~~~~~~
+src/sender.c:208:51: error: use of undeclared identifier 'MSG_DONTWAIT'
+  208 |         ssize_t n = recv(fd, reply, sizeof reply, MSG_DONTWAIT);
+      |                                                   ^~~~~~~~~~~~
+3 errors generated.
+make: *** [build/rudp-send] Error 1
+exit=2
