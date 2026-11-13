@@ -9,9 +9,9 @@ SENDER ?= $(CURDIR)/build/rudp-send
 .PHONY: all check check-probe check-sender check-receiver check-integration check-all clean
 all: build/udp-probe build/rudp-send build/rudp-recv
 
-build/rudp-send: src/sender.c
+build/rudp-send: src/sender.c src/congestion.c src/congestion.h
 	mkdir -p build
-	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(LDFLAGS) -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) src/sender.c src/congestion.c $(LDFLAGS) -o $@
 
 build/rudp-recv: src/receiver.c
 	mkdir -p build
@@ -21,7 +21,20 @@ build/udp-probe: src/udp_probe.c
 	mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(LDFLAGS) -o $@
 
-check: check-probe check-sender check-receiver
+check: check-probe check-sender check-receiver check-congestion
+
+.PHONY: check-congestion check-adaptive
+build/test-congestion: tests/test_congestion.c src/congestion.c src/congestion.h
+	mkdir -p build
+	$(CC) $(CPPFLAGS) $(CFLAGS) tests/test_congestion.c src/congestion.c $(LDFLAGS) -o $@
+
+check-congestion: build/test-congestion
+	./build/test-congestion
+
+check-adaptive: build/rudp-send build/rudp-recv check-congestion
+	mkdir -p "$(TMPDIR)"
+	$(PYTHON) tests/test_adaptive.py ./build/rudp-send
+	$(PYTHON) tests/test_adaptive_transfer.py ./build/rudp-send ./build/rudp-recv
 
 check-probe: build/udp-probe
 	mkdir -p "$(TMPDIR)"
@@ -46,4 +59,4 @@ check-integration: build/rudp-send build/rudp-recv
 check-all: check check-integration
 
 clean:
-	rm -f build/udp-probe build/rudp-send build/rudp-recv
+	rm -f build/udp-probe build/rudp-send build/rudp-recv build/test-congestion

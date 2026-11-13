@@ -1,0 +1,36 @@
+name: Transport validation
+on:
+  push:
+    branches: [feature/congestion-control]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Strict build and fixed baseline regression
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p results
+          make all CFLAGS='-std=c11 -Wall -Wextra -Wpedantic -Werror -O2' CPPFLAGS=-D_DARWIN_C_SOURCE 2>&1 | tee results/build.log
+          make check-all 2>&1 | tee results/baseline.log
+      - name: Adaptive module and real transfer validation
+        shell: bash
+        env:
+          RUDP_ADAPTIVE_EVIDENCE: results/adaptive
+        run: |
+          set -o pipefail
+          make check-adaptive CFLAGS='-std=c11 -Wall -Wextra -Wpedantic -Werror -O2' 2>&1 | tee results/adaptive.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: transport-${{ matrix.os }}
+          path: results/

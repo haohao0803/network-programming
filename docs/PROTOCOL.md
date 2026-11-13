@@ -31,6 +31,10 @@ DATA 从 0 编号，ACK.sequence 是下一个未连续收到的序号。接收�
 
 ## 计时与拥塞接口
 
+LPCAQ 的具体 C 接口、公式、单位、调用顺序、日志及可复跑测试见
+[CONGESTION.md](CONGESTION.md)。`feature/congestion-control` 已提供可选
+`--adaptive` 发送端接入，供本 PR 审阅；下文早期“尚未接入”记录描述固定参数基线。
+
 使用单调时钟。LPCAQ 计算 RTT、RTO、cwnd 和 ssthresh，haohao0803 提供新确认、超时等事件。
 
 - 初始 RTO 建议 1 秒，固定上下限。

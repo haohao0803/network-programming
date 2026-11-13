@@ -77,6 +77,7 @@ sha256sum input.bin outputs/received.bin
 
 ## 开发资料
 
+- [LPCAQ 自适应 RTT/RTO、拥塞接口、单位与参数日志](docs/CONGESTION.md)：`--adaptive` 启用，`make check-adaptive` 验证；固定模式保留用于对照。
 - [整合构建、运行与验证](docs/INTEGRATION.md)
 - [发送端 CSV 事件说明](docs/SENDER_TRACE.md)
 - [Clive 接收端、运行命令与真实联调](docs/RECEIVER.md)
