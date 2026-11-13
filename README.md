@@ -8,7 +8,9 @@ Reliable UDP File Transfer and Network Performance Evaluation
 
 ## 当前状态
 
-当前功能分支提供停止等待与固定滑动窗口发送端：分片、累计 ACK、超时回退重传、接收窗口约束、零窗口探测及明确退出结果。自动测试用专用模拟对端验证文件哈希与异常情况；组员正式接收端联调、自适应超时和拥塞控制仍待完成。详见 [11 月 13 日进度](docs/progress/2026-11-13.md) 和 [窗口开发记录](docs/progress/2026-11-13-window.md)。
+`integration/file-transfer` 整合 haohao0803 的发送端与 Clive-111 的正式接收端，支持停止等待、固定滑动窗口、累计 ACK、超时回退重传、乱序缓存、去重、文件保存和零窗口恢复。构建入口统一提供两端，发送端可记录 CSV 事件。
+
+两端真实文件联调已复跑；本整合版本的验证见 [集成记录](docs/progress/2026-11-13-integration.md)。自适应超时、拥塞控制、Mac/实际服务器验证及性能实验仍待完成。目标版本继续由组员审阅后再合入 main。
 
 目标申报 1.40 档，最终由老师认定。已收到用户提供的汇报要求截图，落实方式见 [汇报要求记录](docs/PRESENTATION.md)；正式截止时间仍待确认。
 
@@ -38,10 +40,12 @@ Reliable UDP File Transfer and Network Performance Evaluation
 核心计划采用 C11、POSIX Socket 和 Make，实验工具使用 Python 3。Windows 在 WSL 2 Ubuntu 内操作，Mac 使用 Command Line Tools 的编译工具。
 
 ```sh
-git clone https://github.com/haohao0803/network-programming.git
+git clone --branch integration/file-transfer https://github.com/haohao0803/network-programming.git
 cd network-programming
 make
 make check
+# 真实 C 两端的故障注入联调，约需一分钟
+make check-integration
 ```
 
 手动运行时，先在一个终端启动接收端，再在另一终端发送。
@@ -53,22 +57,29 @@ make check
 
 当前探测示例只验证本机 UDP 双向收发，监听 127.0.0.1，等待上限 10 秒，接收一次后退出。
 
-停止等待发送端需配合遵循 [协议草案](docs/PROTOCOL.md) 的接收端；探测示例不能接收文件。
+真实文件传输时，先在终端 A 启动接收端（目标文件须尚未存在），再在终端 B 发送：
 
 ```sh
-./build/rudp-send 127.0.0.1 19090 input.bin
-# 可选参数：单次等待毫秒数、额外重试次数
-./build/rudp-send 127.0.0.1 19090 input.bin 1000 5
-# 可选窗口上限（分片数）；默认 1，保留停止等待基线
-./build/rudp-send 127.0.0.1 19090 input.bin 1000 5 16
+# 终端 A
+mkdir -p outputs
+./build/rudp-recv 127.0.0.1 19090 outputs/received.bin
+# 终端 B，input.bin 替换为准备好的普通文件
+./build/rudp-send 127.0.0.1 19090 input.bin 1000 5 4
+sha256sum input.bin outputs/received.bin
+# macOS 用 shasum -a 256 替代 sha256sum
 ```
 
-仅支持数字 IPv4 和不超过 1 GiB 的普通文件。传输期间保持源文件不变。退出码 0 表示获得完成确认，1 表示传输未确认成功，2 表示参数或输入文件错误。窗口上限为 1–256 个分片，缓存按上限分配，接收窗口进一步限制发送范围。默认超时 1 秒、额外重试 5 次；新累计确认会重置连续失败预算，重复 ACK 和窗口更新不延长等待。零窗口期间使用重复 START 或已确认 DATA 探测，连续无进展后失败。
+接收端收到完整数据并保存成功后返回 FIN_ACK，继续保留默认 7 秒的完成状态。发送端窗口参数省略时为 1；可在末尾加 `--trace results/NEW_RUN.csv`，先创建 results 目录并使用新文件名。完整说明见 [整合运行指南](docs/INTEGRATION.md)。
+
+发送端仅支持数字 IPv4 和不超过 1 GiB 的普通文件。传输期间保持源文件不变。退出码 0 表示获得完成确认且所请求日志保存成功，1 表示传输或日志运行错误（stderr 区分是否已获得完成确认），2 表示参数、输入文件或日志创建错误。窗口上限为 1–256 个分片，缓存按上限分配，接收窗口进一步限制发送范围。默认超时 1 秒、额外重试 5 次；新累计确认会重置连续失败预算，重复 ACK 和窗口更新不延长等待。零窗口期间使用重复 START 或已确认 DATA 探测，连续无进展后失败。
 
 当前为固定超时、固定窗口的实验基线；LPCAQ 的计时与拥塞模块接入后，发送上限还会受 cwnd 约束。完整行为及接收端配合要求见 [协议草案](docs/PROTOCOL.md)。
 
 ## 开发资料
 
+- [整合构建、运行与验证](docs/INTEGRATION.md)
+- [发送端 CSV 事件说明](docs/SENDER_TRACE.md)
+- [Clive 接收端、运行命令与真实联调](docs/RECEIVER.md)
 - [小型 Ubuntu / Debian 服务器部署](docs/SERVER.md)
 - [分工、每日计划与验收](docs/PLAN.md)
 - [协议草案与接口讨论](docs/PROTOCOL.md)

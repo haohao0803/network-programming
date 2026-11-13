@@ -1,0 +1,29 @@
+make: Entering directory '/mnt/d/web work/network-programming/work/sender-reference'
+python3 scripts/check_probe.py ./build/udp-probe
+PASS UDP loopback round trip
+READY 127.0.0.1:46191
+PASS UDP loopback round trip
+PASS invalid port and silent-peer timeout
+python3 tests/test_sender.py ./build/rudp-send
+test_boundary_hashes (__main__.SenderTests.test_boundary_hashes) ... ok
+test_bounded_failures (__main__.SenderTests.test_bounded_failures) ... ok
+test_empty_file_with_zero_window (__main__.SenderTests.test_empty_file_with_zero_window) ... ok
+test_invalid_cli_and_files (__main__.SenderTests.test_invalid_cli_and_files) ... ERROR
+test_invalid_confirmations_do_not_advance_state (__main__.SenderTests.test_invalid_confirmations_do_not_advance_state) ... ok
+test_lost_confirmations_and_data (__main__.SenderTests.test_lost_confirmations_and_data) ... ok
+test_malformed_stale_and_foreign_packets (__main__.SenderTests.test_malformed_stale_and_foreign_packets) ... ok
+
+======================================================================
+ERROR: test_invalid_cli_and_files (__main__.SenderTests.test_invalid_cli_and_files)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/web work/network-programming/work/sender-reference/tests/test_sender.py", line 211, in test_invalid_cli_and_files
+    os.mkfifo(fifo)
+OSError: [Errno 95] Operation not supported
+
+----------------------------------------------------------------------
+Ran 7 tests in 8.440s
+
+FAILED (errors=1)
+make: *** [Makefile:18: check] Error 1
+make: Leaving directory '/mnt/d/web work/network-programming/work/sender-reference'

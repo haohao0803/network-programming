@@ -1,0 +1,13 @@
+Receiver source commit: 1bca783348ff53f2a0e4b08d23ae3dc15a763c81
+Sender source commit: b3a4b452c3510da9e13a0621b91dce9eec056097
+Linux 6.6.87.2-microsoft-standard-WSL2 x86_64
+cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Python 3.12.3
+rm -f build/udp-probe build/rudp-recv
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/udp_probe.c  -o build/udp-probe
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/receiver.c  -o build/rudp-recv
+8d4d3b728d662a4443292f4cd24165345c313570377d3c70c55ccf12695cc289  build/rudp-recv
+961fde7adfede28481e898df6f8c88f7eeb3f6e6b97e12228f8c46868bedb4af  work/sender-reference/build/rudp-send
+5f16e502ff198c2d37e5a9b9bc66e7f5c5ed407e6d370b4b8f8f3dcef9d5c701  src/receiver.c
