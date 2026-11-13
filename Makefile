@@ -17,6 +17,7 @@ check: all
 	$(PYTHON) scripts/check_probe.py ./build/udp-probe
 	$(PYTHON) tests/test_sender.py ./build/rudp-send
 	$(PYTHON) tests/test_sender_window.py ./build/rudp-send
+	$(PYTHON) tests/test_sender_trace.py ./build/rudp-send
 
 clean:
 	rm -f build/udp-probe build/rudp-send

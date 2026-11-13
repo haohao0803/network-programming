@@ -20,6 +20,13 @@ enum { HEADER = 20, CHUNK = 1024, START = 1, START_ACK = 2,
 static uint64_t retransmissions;
 static uint64_t probes;
 static uint32_t peak_inflight;
+static FILE *trace_file;
+static int trace_failed;
+static int64_t trace_origin;
+static uint32_t trace_id, trace_base, trace_next;
+static uint16_t trace_window;
+static unsigned trace_rto, trace_limit;
+static uint64_t trace_index;
 
 static void put16(unsigned char *p, uint16_t n)
 { p[0] = (unsigned char)(n >> 8); p[1] = (unsigned char)n; }
@@ -35,6 +42,21 @@ static int64_t now_ms(void)
     struct timespec ts;
     if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) return -1;
     return (int64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+}
+
+/* Local event fields only: do not write untrusted peer strings or file paths. */
+static void trace_event(const char *event, unsigned type, uint32_t seq,
+                         uint32_t base, uint32_t next, uint16_t window)
+{
+    trace_base = base; trace_next = next; trace_window = window;
+    if (!trace_file || trace_failed) return;
+    int64_t timestamp = now_ms();
+    if (timestamp < 0 || fprintf(trace_file,
+            "1,%" PRIu64 ",%" PRIu32 ",%" PRId64 ",%s,%u,%" PRIu32 ",%" PRIu32
+            ",%" PRIu32 ",%u,%u,%u,%" PRIu64 ",%" PRIu64 "\n",
+            trace_index++, trace_id, timestamp - trace_origin, event, type, seq,
+            base, next, window, trace_rto, trace_limit, retransmissions, probes) < 0)
+        trace_failed = 1;
 }
 
 static int number(const char *s, unsigned long low, unsigned long high,
@@ -67,6 +89,8 @@ static int exchange(int fd, const unsigned char *packet, size_t length,
         do { sent = send(fd, packet, length, 0); } while (sent < 0 && errno == EINTR);
         if (sent < 0 || (size_t)sent != length) { perror("send"); return -1; }
         if (attempt) ++retransmissions;
+        trace_event(attempt ? "retransmit" : "send", packet[5], get32(packet + 12),
+                    trace_base, trace_next, *window);
         int64_t start = now_ms();
         if (start < 0) { perror("clock_gettime"); return -1; }
         int64_t deadline = start + timeout_ms;
@@ -89,15 +113,21 @@ static int exchange(int fd, const unsigned char *packet, size_t length,
             if (reply[5] == ERROR_PACKET && get32(reply + 12) == expected_seq &&
                 get16(reply + 16) <= 256) {
                 fprintf(stderr, "Receiver reported an error; transfer not confirmed.\n");
+                trace_event("peer_error", ERROR_PACKET, expected_seq,
+                            trace_base, trace_next, *window);
                 return -1;
             }
             if (reply[5] != expected_type || get32(reply + 12) != expected_seq ||
                 get16(reply + 16) != 0) continue;
             *window = get16(reply + 18);
+            trace_event("control_ack", expected_type, expected_seq,
+                        trace_base, trace_next, *window);
             return 0;
         }
         fprintf(stderr, "timeout type=%u sequence=%" PRIu32 " attempt=%u/%u\n",
                 packet[5], get32(packet + 12), attempt + 1, retries + 1);
+        trace_event("timeout", packet[5], get32(packet + 12),
+                    trace_base, trace_next, *window);
     }
     fprintf(stderr, "Retry budget exhausted; transfer not confirmed.\n");
     return -1;
@@ -160,6 +190,7 @@ static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t
             size_t probe_length = base ? last_acked.length : start_length;
             if (transmit(fd, probe, probe_length)) goto done_data;
             ++probes;
+            trace_event("probe", probe[5], get32(probe + 12), base, next, window);
             probing = 1;
         }
         if (window) probing = 0;
@@ -169,6 +200,7 @@ static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t
                 transmit(fd, slot->packet, slot->length)) goto done_data;
             ++next;
             if (next - base > peak_inflight) peak_inflight = next - base;
+            trace_event("send", DATA, next - 1, base, next, window);
         }
         clock = now_ms();
         if (clock < 0) { perror("clock_gettime"); goto done_data; }
@@ -179,6 +211,7 @@ static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t
                 goto done_data;
             }
             ++failures;
+            trace_event("timeout", DATA, base, base, next, window);
             fprintf(stderr, "timeout DATA base=%" PRIu32 " next=%" PRIu32
                     " window=%u retry=%u/%u\n", base, next, window, failures, retries);
             if (!window) {
@@ -186,12 +219,14 @@ static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t
                 size_t probe_length = base ? last_acked.length : start_length;
                 if (transmit(fd, probe, probe_length)) goto done_data;
                 ++probes;
+                trace_event("probe", probe[5], get32(probe + 12), base, next, window);
             } else {
                 /* Do not retransmit outside a newly reduced receive window. */
                 for (uint32_t seq = base; seq < next && seq - base < span; ++seq) {
                     struct slot *slot = &slots[seq % limit];
                     if (transmit(fd, slot->packet, slot->length)) goto done_data;
                     ++retransmissions;
+                    trace_event("retransmit", DATA, seq, base, next, window);
                 }
             }
             clock = now_ms();
@@ -215,18 +250,28 @@ static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t
         if (reply[5] == ERROR_PACKET && get16(reply + 16) <= 256 &&
             ((base < ack && ack <= next) || (probing && !base && !ack))) {
             fprintf(stderr, "Receiver reported a DATA/probe error; transfer not confirmed.\n");
+            trace_event("peer_error", ERROR_PACKET, ack, base, next, window);
             goto done_data;
         }
         if (get16(reply + 16)) continue;
         if (probing && !base && reply[5] == START_ACK && !ack) {
+            uint16_t previous = window;
             window = get16(reply + 18);
+            if (window != previous)
+                trace_event("window_update", START_ACK, ack, base, next, window);
             continue;
         }
         if (reply[5] != ACK || ack < base || ack > next) continue;
+        uint16_t previous = window;
         window = get16(reply + 18);
-        if (ack == base) continue; /* Window update, not progress or extra time. */
+        if (ack == base) {
+            if (window != previous)
+                trace_event("window_update", ACK, ack, base, next, window);
+            continue; /* Window update, not progress or extra time. */
+        }
         last_acked = slots[(ack - 1) % limit];
         base = ack;
+        trace_event("ack", ACK, ack, base, next, window);
         failures = 0;
         probing = 0;
         clock = now_ms();
@@ -241,6 +286,11 @@ done_data:
 
 int main(int argc, char **argv)
 {
+    const char *trace_path = NULL;
+    if (argc >= 3 && !strcmp(argv[argc - 2], "--trace")) {
+        trace_path = argv[argc - 1];
+        argc -= 2;
+    }
     unsigned long port, timeout = 1000, retries = 5, window_limit = 1;
     struct sockaddr_in peer;
     memset(&peer, 0, sizeof peer);
@@ -251,7 +301,7 @@ int main(int argc, char **argv)
         (argc >= 6 && (number(argv[4], 10, 10000, &timeout) ||
                        number(argv[5], 0, 20, &retries))) ||
         (argc == 7 && number(argv[6], 1, 256, &window_limit))) {
-        fprintf(stderr, "Usage: %s IPV4 PORT FILE [TIMEOUT_MS RETRIES [WINDOW_PACKETS]]\n", argv[0]);
+        fprintf(stderr, "Usage: %s IPV4 PORT FILE [TIMEOUT_MS RETRIES [WINDOW_PACKETS]] [--trace CSV]\n", argv[0]);
         return 2;
     }
     peer.sin_port = htons((uint16_t)port);
@@ -281,6 +331,18 @@ int main(int argc, char **argv)
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) { perror("socket"); close(input); return 1; }
     int result = 1;
+    trace_id = id; trace_rto = (unsigned)timeout; trace_limit = (unsigned)window_limit;
+    trace_origin = now_ms();
+    if (trace_origin < 0) { perror("clock_gettime"); goto done; }
+    if (trace_path) {
+        /* Exclusive create prevents overwriting input files or old evidence. */
+        trace_file = fopen(trace_path, "wx");
+        if (!trace_file) { perror("create trace (must be a new file)"); result = 2; goto done; }
+        if (fprintf(trace_file, "schema_version,event_index,transfer_id,elapsed_ms,event,packet_type,"
+                    "sequence,base,next,receive_window,rto_ms,configured_window,retransmissions,probes\n") < 0)
+            trace_failed = 1;
+    }
+    trace_event("begin", 0, 0, 0, 0, 0);
     if (connect(fd, (struct sockaddr *)&peer, sizeof peer)) { perror("connect"); goto done; }
     unsigned char packet[HEADER + CHUNK];
     uint16_t window = 0;
@@ -301,11 +363,26 @@ int main(int argc, char **argv)
     length = header(packet, FIN, id, chunks, 0);
     if (exchange(fd, packet, length, FIN_ACK, id, chunks,
                  (unsigned)timeout, (unsigned)retries, &window)) goto done;
-    printf("PASS sender bytes=%" PRIu64 " chunks=%" PRIu32 " retransmissions=%" PRIu64
-           " probes=%" PRIu64 " window=%lu peak_inflight=%" PRIu32 "\n",
-           size, chunks, retransmissions, probes, window_limit, peak_inflight);
     result = 0;
 done:
     close(fd); close(input);
+    trace_event(result == 0 ? "complete" : "failed", 0, trace_base,
+                trace_base, trace_next, trace_window);
+    if (trace_file) {
+        if (fflush(trace_file) || ferror(trace_file)) trace_failed = 1;
+        if (fclose(trace_file)) trace_failed = 1;
+        if (trace_failed) {
+            fprintf(stderr, "Trace could not be saved; receiver completion %s.\n",
+                    result == 0 ? "confirmed" : "not confirmed");
+            result = 1;
+        }
+    }
+    if (result == 0) {
+        int64_t elapsed = now_ms();
+        if (elapsed < 0) { perror("clock_gettime"); return 1; }
+        printf("PASS sender bytes=%" PRIu64 " chunks=%" PRIu32 " retransmissions=%" PRIu64
+               " probes=%" PRIu64 " window=%lu peak_inflight=%" PRIu32 " elapsed_ms=%" PRId64 "\n",
+               size, chunks, retransmissions, probes, window_limit, peak_inflight, elapsed - trace_origin);
+    }
     return result;
 }
