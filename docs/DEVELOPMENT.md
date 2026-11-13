@@ -71,6 +71,8 @@ sudo unshare --net sh -c 'ip link set lo up && python3 scripts/check_probe.py bu
 
 ## 分支与 PR
 
+2026-11-13 已安装 Make，并在本机临时隔离网络中通过 `make clean`、`make check`。默认 WSL 网络问题尚未修复；这次结果不代表默认网络、Mac 或远端服务器验证通过。详见 [开发记录与日志](progress/2026-11-13.md)。
+
 | 成员 | 功能分支建议 |
 | --- | --- |
 | haohao0803 | feature/sender |
