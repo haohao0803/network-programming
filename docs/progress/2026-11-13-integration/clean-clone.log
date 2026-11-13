@@ -1,0 +1,14 @@
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -O2 src/udp_probe.c  -o build/udp-probe
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -O2 src/sender.c  -o build/rudp-send
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -O2 src/receiver.c  -o build/rudp-recv
+test_real_output_and_trace_agree (__main__.TraceTransferTests.test_real_output_and_trace_agree) ... PASS traced-transfer window=1 bytes=4097 sha256=b574ebff706803df9f0a526bdd804c9eba68c5006891005ed3221e4816db1aa6 rows=16
+PASS traced-transfer window=4 bytes=4097 sha256=b574ebff706803df9f0a526bdd804c9eba68c5006891005ed3221e4816db1aa6 rows=16
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.563s
+
+OK
