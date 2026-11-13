@@ -12,6 +12,8 @@ Reliable UDP File Transfer and Network Performance Evaluation
 
 两端真实文件联调已复跑；本整合版本的验证见 [集成记录](docs/progress/2026-11-13-integration.md)。自适应超时、拥塞控制、Mac/实际服务器验证及性能实验仍待完成。目标版本继续由组员审阅后再合入 main。
 
+bushi510 已上传 Apple 兼容修复及其版本的 Mac 实测记录、测试文件和实验工具，见 [EXPERIMENTS.md](docs/EXPERIMENTS.md)。其 Mac 结果针对该记录中的源码；包含新增 CSV 功能的最新整合版本仍需 Mac 复跑，Linux 接入验证另行记录。
+
 目标申报 1.40 档，最终由老师认定。已收到用户提供的汇报要求截图，落实方式见 [汇报要求记录](docs/PRESENTATION.md)；正式截止时间仍待确认。
 
 **内部截止为 2026-11-17 23:59，时区 Asia/Shanghai，2026-11-18 可演示。** 老师正式截止时间待确认。
@@ -79,6 +81,8 @@ sha256sum input.bin outputs/received.bin
 
 - [整合构建、运行与验证](docs/INTEGRATION.md)
 - [发送端 CSV 事件说明](docs/SENDER_TRACE.md)
+- [实验工具与组员 Mac 证据](docs/EXPERIMENTS.md)
+- [本项目 tc 6.15 与固定种子环境](docs/LOCAL_TC.md)
 - [Clive 接收端、运行命令与真实联调](docs/RECEIVER.md)
 - [小型 Ubuntu / Debian 服务器部署](docs/SERVER.md)
 - [分工、每日计划与验收](docs/PLAN.md)

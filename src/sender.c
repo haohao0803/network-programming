@@ -1,3 +1,7 @@
+#if defined(__APPLE__)
+/* MSG_DONTWAIT is a Darwin socket extension hidden in strict POSIX mode. */
+#define _DARWIN_C_SOURCE
+#endif
 #define _POSIX_C_SOURCE 200809L
 #include <arpa/inet.h>
 #include <errno.h>

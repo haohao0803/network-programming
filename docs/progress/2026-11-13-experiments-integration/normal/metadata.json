@@ -1,0 +1,31 @@
+{
+  "started_utc": "2026-11-13T09:38:38.220132+00:00",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "git_commit": null,
+  "git_status": null,
+  "sender_sha256": "a561c03e1fd48edad3d7afa7abd4a75086a776ff2f1a748c402a7bf1164ae029",
+  "receiver_sha256": "8d4d3b728d662a4443292f4cd24165345c313570377d3c70c55ccf12695cc289",
+  "source_sha256": "d960753708565a4be4ed40704005e0a364b490b0a5bfae8cf2a126e4ba6d6e7f",
+  "source_bytes": 1025,
+  "scenario": "normal",
+  "network_note": "Unmodified local loopback; not a WAN benchmark",
+  "parameters": {
+    "sender": "build/rudp-send",
+    "receiver": "build/rudp-recv",
+    "file": "results/experiments-integration-a5f31eb/fixtures/payload-1025.bin",
+    "output": "results/experiments-integration-a5f31eb/normal",
+    "windows": [
+      1,
+      16
+    ],
+    "receive_window": 64,
+    "repeats": 1,
+    "timeout_ms": 120,
+    "retries": 5,
+    "max_seconds": 600,
+    "scenario": "normal",
+    "network_note": "Unmodified local loopback; not a WAN benchmark",
+    "keep_files": false
+  }
+}

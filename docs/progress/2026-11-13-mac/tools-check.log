@@ -1,0 +1,53 @@
+$ python3 scripts/file_tools.py generate test-data/mac-validation
+test-data/mac-validation/manifest.json
+exit=0
+$ python3 scripts/file_tools.py verify test-data/mac-validation/payload-1024.bin test-data/mac-validation/payload-1024.bin
+{
+  "source": "test-data/mac-validation/payload-1024.bin",
+  "received": "test-data/mac-validation/payload-1024.bin",
+  "source_bytes": 1024,
+  "received_bytes": 1024,
+  "source_sha256": "af51ae1a5a7209f9eb8320e23650229349cb61e6fcd014f320c8825a4c776b7c",
+  "received_sha256": "af51ae1a5a7209f9eb8320e23650229349cb61e6fcd014f320c8825a4c776b7c",
+  "match": true
+}
+exit=0
+$ python3 scripts/file_tools.py verify test-data/mac-validation/payload-1024.bin test-data/mac-validation/payload-1025.bin
+{
+  "source": "test-data/mac-validation/payload-1024.bin",
+  "received": "test-data/mac-validation/payload-1025.bin",
+  "source_bytes": 1024,
+  "received_bytes": 1025,
+  "source_sha256": "af51ae1a5a7209f9eb8320e23650229349cb61e6fcd014f320c8825a4c776b7c",
+  "received_sha256": "d960753708565a4be4ed40704005e0a364b490b0a5bfae8cf2a126e4ba6d6e7f",
+  "match": false
+}
+exit=1
+$ python3 scripts/file_tools.py verify test-data/mac-validation/payload-1024.bin test-data/mac-validation/missing.bin
+ERROR: [Errno 2] No such file or directory: 'test-data/mac-validation/missing.bin'
+exit=2
+$ python3 scripts/run_netem.py --file test-data/mac-validation/payload-1024.bin --output results/not-linux
+usage: run_netem.py [-h] --file FILE --output OUTPUT [--seed SEED]
+                    [--repeats REPEATS] [--max-seconds MAX_SECONDS]
+run_netem.py: error: Run on Linux with sudo; Mac cannot validate Linux netem.
+exit=2
+$ python3 scripts/check_server.py
+FAIL Run this check on the Linux server.
+exit=2
+
+Same-size corruption test (expected exit=1):
+{
+  "source": "test-data/mac-validation/payload-1024.bin",
+  "received": "test-data/same-size-corrupt.bin",
+  "source_bytes": 1024,
+  "received_bytes": 1024,
+  "source_sha256": "af51ae1a5a7209f9eb8320e23650229349cb61e6fcd014f320c8825a4c776b7c",
+  "received_sha256": "49abd65bbf7f7e40c7055093ed2e3fd75f2f602f2c5fcf955c213e3135eb03f7",
+  "match": false
+}
+exit=1
+PASS all new Python scripts compile with Python 3.9 (compile built-in, no bytecode cache writes)
+PASS failed receiver startup retained in JSONL; runner returned 1
+PASS all-failure summary completion rate=0; success-only means empty
+PASS CSV generated; both success and failure SVG files parse as XML
+PASS final C binary hashes equal integration-tested binaries
