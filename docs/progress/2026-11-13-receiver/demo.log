@@ -1,0 +1,8 @@
+Receiver command: ['/mnt/d/web work/network-programming/build/rudp-recv', '127.0.0.1', '19090', '/mnt/d/web work/network-programming/outputs/received.bin']
+Sender command: ['/mnt/d/web work/network-programming/work/sender-reference/build/rudp-send', '127.0.0.1', '19090', '/mnt/d/web work/network-programming/work/input.bin']
+PASS sender bytes=1048576 chunks=1024 retransmissions=0 probes=0 window=1 peak_inflight=1
+READY 127.0.0.1:19090 pid=545
+PASS receiver bytes=1048576 chunks=1024 duplicates=0 peak_buffered=1
+Sender exit: 0; receiver exit: 0
+Source SHA-256: 806a64791a1e62002753ba8a1aabc43cd0cf4c631fe31d0252c403a90311c790
+Output SHA-256: 806a64791a1e62002753ba8a1aabc43cd0cf4c631fe31d0252c403a90311c790
