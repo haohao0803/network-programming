@@ -79,9 +79,9 @@ sudo python3 scripts/collect_server_preflight.py --output results/server-preflig
 Ubuntu/Debian 缺少 ping 时对应软件包是 `iputils-ping`，安装由服务器所有者处理。
 sudo 执行的构建及输出可能归 root 所有，建议使用专用实验克隆。
 
-## Linux 弱网矩阵（已编写，待真实 Linux 验证）
+## Linux 弱网矩阵（本机流程预跑通过，正式矩阵待执行）
 
-整合补充：当前 WSL 的系统 tc 6.1.0 不识别 seed；项目已单独构建并安装 tc 6.15.0，实测内核返回 seed=20261113。构建、检查和选择新版的入口见 [LOCAL_TC.md](LOCAL_TC.md)，Linux 接入过程及原始失败日志见 [整合记录](progress/2026-11-13-experiments-integration.md)。本节原 Mac 分支交付时的“待验证”状态保留，最新整合结果在该记录追加。
+整合补充：当前 WSL 的系统 tc 6.1.0 不识别 seed；项目已单独构建并安装 tc 6.15.0，实测内核返回 seed=20261113，四场景、双窗口的 8 次小文件预跑通过。构建、检查和选择新版的入口见 [LOCAL_TC.md](LOCAL_TC.md)，Linux 接入过程及原始失败日志见 [整合记录](progress/2026-11-13-experiments-integration.md)。这些是工具接入证据，不是完整性能评估。
 
 ```sh
 sudo python3 scripts/run_netem.py \
@@ -115,6 +115,6 @@ netem 随机种子需要服务器内核/iproute2 支持；不支持时会明确�
 ## 当前证据与未完成项
 
 - Mac 实测见 [11 月 13 日记录](progress/2026-11-13-mac.md)。
-- 真实 Linux 服务器预检、跨机器传输及 netem 矩阵尚未运行：当前没有服务器连接信息。
+- 实际 Linux 服务器预检和跨机器传输尚未运行：当前没有服务器连接信息。本机 WSL 的 8 次 netem 流程预跑已完成，正式 24 次性能矩阵仍待执行。
 - LPCAQ 分支和计时/拥塞接口尚未提供，当前结果属于固定超时/窗口基线。
 - RTT/RTO/cwnd 图表待该模块日志就绪后接入，当前图表仅使用真实吞吐量数据。
