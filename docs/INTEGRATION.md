@@ -1,6 +1,6 @@
 # 两端整合指南
 
-`integration/file-transfer` 包含 haohao0803 的发送端和 Clive-111 的接收端，保留原始作者提交。组员审阅后再合并到 main。Clive 的独立分支说明及历史验证保留在 RECEIVER.md；本页为整合分支的统一入口。
+`integration/file-transfer` 包含 haohao0803 的发送端、Clive-111 的接收端、bushi510 的 Mac 修复/实验工具和 LPCAQ 的自适应参数模块，保留原始作者提交。组员审阅后再合并到 main。各模块历史记录保留；本页为整合分支的统一入口。
 
 ## 构建与检查
 
@@ -10,9 +10,12 @@ cd network-programming
 make
 make check
 make check-integration
+make check-adaptive
 ```
 
 `make` 构建 udp-probe、rudp-send、rudp-recv。`make check` 执行探测、发送端、窗口、日志及接收端检查。`make check-integration` 使用本目录两端程序执行真实落盘验证：Clive 的 31 个故障场景，加本人新增的停止等待/窗口日志联调。`make check-all` 顺序执行两个检查入口。
+
+`make check` 另含 LPCAQ 的参数公式检查。`make check-adaptive` 执行公式、自适应模拟对端和真实接收端检查；该入口须单独运行，`check-all` 保留固定模式回归范围。自适应模式通过 `--adaptive` 启用，接口、毫秒/包单位及 schema 2 日志见 [CONGESTION.md](CONGESTION.md)。
 
 测试临时文件默认使用已有 TMPDIR，否则使用 POSIX `/tmp`。WSL 中优先使用 Linux 文件系统，避免 Windows 挂载目录对 FIFO 或并发日志读取的影响。可指定 `make TEST_TMPDIR=/dev/shm check-all`；编译产物和持久记录仍留在仓库中。直接运行 Python 测试时请单独设置 TMPDIR，Make 的导出设置只作用于 Make 启动的进程。
 
@@ -45,6 +48,17 @@ macOS 用 `shasum -a 256`。接收端默认等待上限为 15 秒，成功保存
 
 本机 WSL 默认回环异常时，在临时隔离网络内执行 `sudo unshare --net sh -c 'ip link set lo up && make check-all'`。该方法只验证隔离的 Linux 网络，不修复默认 WSL 或 VPN，也不证明实际 VPS 已部署。
 
+自适应模式示例（新建输出文件，终端 A 后立即启动 B）：
+
+```sh
+# Terminal A: 120 s idle budget; 7 s FIN linger
+./build/rudp-recv 127.0.0.1 19090 outputs/adaptive-new.bin 64 120000 7000
+# Terminal B: initial RTO 1000 ms, 2 extra retries, cap 16 DATA packets
+./build/rudp-send 127.0.0.1 19090 results/input.bin 1000 2 16 --adaptive --trace results/adaptive-new.csv
+```
+
+120 s idle 仅为此示例配置，不保证任意 RTO/重试组合；按 CONGESTION.md 的退避上界调整。完成保留期仍依据 START/FIN 固定计时配置。现有批量脚本尚未启用自适应模式，等待实验负责人增加模式选择和日志采集。
+
 ## 记录与剩余工作
 
 集成原始结果可用以下环境变量保存，所指父目录由测试创建：
@@ -55,4 +69,4 @@ RUDP_RESULTS_JSON=results/integration.json RUDP_TRACE_RESULTS_DIR=results/traces
 
 记录双方退出码、源文件/真实输出哈希及故障计数；CSV 规则见 SENDER_TRACE.md。首次故障复现和修复环境也需保留，不把失败记录替换成只有通过的结论。
 
-LPCAQ 的自适应 RTO/退避/cwnd 接入、bushi510 的批量性能实验与 Mac 验证、实际服务器检查和最终汇报仍待完成。本次整合不修改接收端 C 实现，测试包装和构建调整属于 haohao0803 的集成工作。
+LPCAQ 的自适应 RTO/退避/cwnd 已提供并进入本整合分支；完成状态以随版本保存的验证证据为准。bushi510 的正式批量性能实验、最新组合的跨平台检查、实际服务器/跨机器验证和最终汇报仍待完成。测试包装和构建调整属于 haohao0803 的集成工作。

@@ -1,0 +1,43 @@
+2026-11-13T20:26:51+08:00
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 tests/test_congestion.c src/congestion.c  -o build/test-congestion
+./build/test-congestion
+PASS congestion: RTT formula, Karn input, duplicate ACK, slow start, congestion avoidance, loss, persist, caps
+mkdir -p "/tmp"
+python3 tests/test_adaptive.py ./build/rudp-send
+test_boundaries (__main__.AdaptiveTests.test_boundaries) ... ok
+test_bounded_no_progress (__main__.AdaptiveTests.test_bounded_no_progress) ... ok
+test_growth_and_flow_limit (__main__.AdaptiveTests.test_growth_and_flow_limit) ... ok
+test_loss_backoff_and_karn (__main__.AdaptiveTests.test_loss_backoff_and_karn) ... ok
+test_reject_invalid_initial_rto (__main__.AdaptiveTests.test_reject_invalid_initial_rto) ... ok
+test_zero_window_resume_and_persist (__main__.AdaptiveTests.test_zero_window_resume_and_persist) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 17.892s
+
+OK
+python3 tests/test_adaptive_transfer.py ./build/rudp-send ./build/rudp-recv
+test_real_files (__main__.AdaptiveTransferTests.test_real_files) ... PASS adaptive file-0: bytes=0 sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+PASS adaptive file-1: bytes=1 sha256=5ee0dd4d4840229fab4a86438efbcaf1b9571af94f5ace5acc94de19e98ea9ab
+PASS adaptive file-1024: bytes=1024 sha256=2088c3d369fa02f6d31b0c83bf8eac65e0ec4855348836d3d3b9e3284826bda3
+PASS adaptive file-1025: bytes=1025 sha256=03e2c8579f032b1c58dbda838bba7b81be023a4f79636a1e3d560672fce49d5e
+PASS adaptive file-1048576: bytes=1048576 sha256=6d3af67d05cf314316aa12dafbe8f5d258047b5539141cc8ee68949f97ce9dd7
+ok
+test_real_flow_control (__main__.AdaptiveTransferTests.test_real_flow_control) ... PASS adaptive receive-window-2: bytes=65549 sha256=15546f9c62b72cbe7029f985025bacf7b178023d3e031e3194b778fdd2f451d3
+PASS adaptive zero-window-resume: bytes=65549 sha256=15546f9c62b72cbe7029f985025bacf7b178023d3e031e3194b778fdd2f451d3
+ok
+test_real_loss (__main__.AdaptiveTransferTests.test_real_loss) ... PASS adaptive drop-type-3: bytes=65549 sha256=15546f9c62b72cbe7029f985025bacf7b178023d3e031e3194b778fdd2f451d3
+PASS adaptive drop-type-4: bytes=65549 sha256=15546f9c62b72cbe7029f985025bacf7b178023d3e031e3194b778fdd2f451d3
+PASS adaptive drop-type-6: bytes=65549 sha256=15546f9c62b72cbe7029f985025bacf7b178023d3e031e3194b778fdd2f451d3
+ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 38.290s
+
+OK
+9d91c63c6d946b9e9bd043a6ed0e755b9d45efc0781f27325922d47ab4b498c9  src/sender.c
+615ecbaa49989c8c63ac10d65fd5a1e3a27cdc2e9a95da139a0704c4be88d3ea  src/receiver.c
+242e3a37ae7375a0845a7e94cb16804946bae29eaefaefb13805dc215a61d753  src/congestion.c
+0c8f26323a150f678fb5350e92e20044605e4a3acce47af81f63dfc4dfbb8e58  src/congestion.h
+5bc34942e88b90dc977fe7cf189f81eb3d6413949fcb43ba3f56d9118840462f  build/rudp-send
+8d4d3b728d662a4443292f4cd24165345c313570377d3c70c55ccf12695cc289  build/rudp-recv

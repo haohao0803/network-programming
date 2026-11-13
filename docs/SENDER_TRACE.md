@@ -22,7 +22,7 @@ mkdir -p results
 | sequence | 事件涉及的报文序号；本地结束事件为当前 base |
 | base / next | 事件后的最早未确认、首个尚未发送序号 |
 | receive_window | 最近接受的有效窗口通告，单位为分片 |
-| rto_ms | 当前固定超时配置，单位为毫秒；尚非自适应 RTO |
+| rto_ms | 单位毫秒；固定模式为配置值，自适应 DATA 为当前 RTO，START/FIN 仍为固定配置值 |
 | configured_window | 本地配置上限，单位为分片；不是 cwnd |
 | retransmissions / probes | 截至该事件的累计重传/探测次数，探测单独计数 |
 
@@ -46,6 +46,6 @@ mkdir -p results
 
 日志写入或关闭失败时程序返回 1，并明确区分接收完成是否已经确认；不会输出 PASS。日志创建失败返回 2，尚未发送任何报文。强制终止可能留下不完整 CSV；判断实验结果必须同时保存程序退出码、双方输出和文件哈希。
 
-日志会产生额外 I/O，比较实验需统一是否启用。当前没有 RTT 样本、cwnd 或 ssthresh 数据，接入参数模块后共同定义版本扩展。批量实验还需记录提交号、文件大小/哈希、系统、网络条件、种子和运行 ID，这些由实验编排工具补充，不能仅凭此 CSV 宣称实验记录完整。
+日志会产生额外 I/O，比较实验需统一是否启用。不加 `--adaptive` 仍输出本文 schema 1。自适应模式输出 LPCAQ 的 schema 2，增加 RTT/SRTT/RTTVAR/cwnd/ssthresh/有效窗口列；单位与无有效样本的含义见 [CONGESTION.md](CONGESTION.md)。批量实验还需记录提交号、文件大小/哈希、系统、网络条件、种子和运行 ID，这些由实验编排工具补充，不能仅凭此 CSV 宣称实验记录完整。
 
 验证入口：`python3 tests/test_sender_trace.py ./build/rudp-send`。6 个测试方法覆盖事件/计数与实际结果对应、零窗口恢复、控制确认丢失、最终未确认、文件保护、日志写入失败和默认参数。

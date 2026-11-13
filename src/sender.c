@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+#include "congestion.h"
 
 /* Wire layout is encoded explicitly; never transmit a native C struct. */
 enum { HEADER = 20, CHUNK = 1024, START = 1, START_ACK = 2,
@@ -31,6 +32,9 @@ static uint32_t trace_id, trace_base, trace_next;
 static uint16_t trace_window;
 static unsigned trace_rto, trace_limit;
 static uint64_t trace_index;
+static int adaptive;
+static struct rudp_cc congestion;
+static int64_t trace_rtt = -1;
 
 static void put16(unsigned char *p, uint16_t n)
 { p[0] = (unsigned char)(n >> 8); p[1] = (unsigned char)n; }
@@ -56,11 +60,17 @@ static void trace_event(const char *event, unsigned type, uint32_t seq,
     if (!trace_file || trace_failed) return;
     int64_t timestamp = now_ms();
     if (timestamp < 0 || fprintf(trace_file,
-            "1,%" PRIu64 ",%" PRIu32 ",%" PRId64 ",%s,%u,%" PRIu32 ",%" PRIu32
-            ",%" PRIu32 ",%u,%u,%u,%" PRIu64 ",%" PRIu64 "\n",
-            trace_index++, trace_id, timestamp - trace_origin, event, type, seq,
+            "%u,%" PRIu64 ",%" PRIu32 ",%" PRId64 ",%s,%u,%" PRIu32 ",%" PRIu32
+            ",%" PRIu32 ",%u,%u,%u,%" PRIu64 ",%" PRIu64,
+            adaptive ? 2u : 1u, trace_index++, trace_id, timestamp - trace_origin, event, type, seq,
             base, next, window, trace_rto, trace_limit, retransmissions, probes) < 0)
         trace_failed = 1;
+    if (adaptive && !trace_failed && fprintf(trace_file,
+            ",%" PRId64 ",%.3f,%.3f,%.6f,%.3f,%u", trace_rtt,
+            congestion.srtt_ms, congestion.rttvar_ms, congestion.cwnd_packets,
+            congestion.ssthresh_packets, rudp_cc_window(&congestion, window)) < 0)
+        trace_failed = 1;
+    if (fputc('\n', trace_file) == EOF) trace_failed = 1;
 }
 
 static int number(const char *s, unsigned long low, unsigned long high,
@@ -88,6 +98,8 @@ static int exchange(int fd, const unsigned char *packet, size_t length,
                     unsigned expected_type, uint32_t id, uint32_t expected_seq,
                     unsigned timeout_ms, unsigned retries, uint16_t *window)
 {
+    trace_rto = timeout_ms;
+    trace_rtt = -1;
     for (unsigned attempt = 0; attempt <= retries; ++attempt) {
         ssize_t sent;
         do { sent = send(fd, packet, length, 0); } while (sent < 0 && errno == EINTR);
@@ -140,6 +152,8 @@ static int exchange(int fd, const unsigned char *packet, size_t length,
 struct slot {
     unsigned char packet[HEADER + CHUNK];
     size_t length;
+    int64_t sent_ms;
+    int ambiguous;
 };
 
 static int transmit(int fd, const unsigned char *packet, size_t length)
@@ -169,24 +183,26 @@ static int read_chunk(int input, struct slot *slot, uint64_t size,
 
 /* Go-back-N with a bounded ring of original datagrams. The advertised window
  * spans [ACK.sequence, ACK.sequence + receive_window), not free-buffer count.
- * Fixed timeout/window is the experimental baseline; congestion control is
- * owned by LPCAQ and will be integrated after its interface is supplied. */
+ * Fixed timeout/window is the experimental baseline; --adaptive enables
+ * LPCAQ's timer/congestion module without changing the wire protocol. */
 static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t id,
                      unsigned limit, unsigned timeout_ms, unsigned retries,
                      uint16_t window, const unsigned char *start, size_t start_length)
 {
+    if (adaptive) trace_rto = congestion.rto_ms;
     if (!chunks) return 0;
     struct slot *slots = calloc(limit, sizeof *slots);
     if (!slots) { perror("allocate send window"); return -1; }
-    struct slot last_acked = { {0}, 0 };
+    struct slot last_acked = {0};
     uint32_t base = 0, next = 0;
     unsigned failures = 0;
     int probing = 0, result = -1;
     int64_t clock = now_ms();
     if (clock < 0) { perror("clock_gettime"); goto done_data; }
-    int64_t deadline = clock + timeout_ms;
+    int64_t deadline = clock + (adaptive ? congestion.rto_ms : timeout_ms);
     while (base < chunks) {
         uint32_t span = window < limit ? window : limit;
+        if (adaptive) span = rudp_cc_window(&congestion, window);
         if (!window && !probing) {
             /* No new DATA in a zero window. Repeated START (base=0), or an
              * already acknowledged DATA packet, asks for the current window. */
@@ -202,6 +218,9 @@ static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t
             struct slot *slot = &slots[next % limit];
             if (read_chunk(input, slot, size, id, next) ||
                 transmit(fd, slot->packet, slot->length)) goto done_data;
+            slot->sent_ms = now_ms();
+            if (slot->sent_ms < 0) { perror("clock_gettime"); goto done_data; }
+            slot->ambiguous = 0;
             ++next;
             if (next - base > peak_inflight) peak_inflight = next - base;
             trace_event("send", DATA, next - 1, base, next, window);
@@ -215,6 +234,15 @@ static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t
                 goto done_data;
             }
             ++failures;
+            if (adaptive) {
+                rudp_cc_timeout(&congestion, next - base, window != 0);
+                trace_rto = congestion.rto_ms;
+                trace_rtt = -1;
+                span = rudp_cc_window(&congestion, window);
+                /* Suppress cumulative-ACK samples across the recovery flight. */
+                for (uint32_t seq = base; seq < next; ++seq)
+                    slots[seq % limit].ambiguous = 1;
+            }
             trace_event("timeout", DATA, base, base, next, window);
             fprintf(stderr, "timeout DATA base=%" PRIu32 " next=%" PRIu32
                     " window=%u retry=%u/%u\n", base, next, window, failures, retries);
@@ -235,7 +263,7 @@ static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t
             }
             clock = now_ms();
             if (clock < 0) { perror("clock_gettime"); goto done_data; }
-            deadline = clock + timeout_ms;
+            deadline = clock + (adaptive ? congestion.rto_ms : timeout_ms);
             continue;
         }
         struct pollfd pfd = { fd, POLLIN, 0 };
@@ -273,6 +301,16 @@ static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t
                 trace_event("window_update", ACK, ack, base, next, window);
             continue; /* Window update, not progress or extra time. */
         }
+        clock = now_ms();
+        if (clock < 0) { perror("clock_gettime"); goto done_data; }
+        if (adaptive) {
+            int ambiguous = 0;
+            for (uint32_t seq = base; seq < ack; ++seq)
+                if (slots[seq % limit].ambiguous) ambiguous = 1;
+            trace_rtt = ambiguous ? -1 : clock - slots[(ack - 1) % limit].sent_ms;
+            rudp_cc_ack(&congestion, ack - base, trace_rtt);
+            trace_rto = congestion.rto_ms;
+        }
         last_acked = slots[(ack - 1) % limit];
         base = ack;
         trace_event("ack", ACK, ack, base, next, window);
@@ -280,7 +318,7 @@ static int send_data(int fd, int input, uint64_t size, uint32_t chunks, uint32_t
         probing = 0;
         clock = now_ms();
         if (clock < 0) { perror("clock_gettime"); goto done_data; }
-        deadline = clock + timeout_ms;
+        deadline = clock + (adaptive ? congestion.rto_ms : timeout_ms);
     }
     result = 0;
 done_data:
@@ -291,10 +329,19 @@ done_data:
 int main(int argc, char **argv)
 {
     const char *trace_path = NULL;
-    if (argc >= 3 && !strcmp(argv[argc - 2], "--trace")) {
-        trace_path = argv[argc - 1];
-        argc -= 2;
+    int positional = 1;
+    for (int i = 1; i < argc; ++i) {
+        if (!strcmp(argv[i], "--adaptive")) {
+            if (adaptive) { fprintf(stderr, "Duplicate --adaptive.\n"); return 2; }
+            adaptive = 1;
+        } else if (!strcmp(argv[i], "--trace")) {
+            if (trace_path || i + 1 >= argc) {
+                fprintf(stderr, "--trace requires one new CSV path.\n"); return 2;
+            }
+            trace_path = argv[++i];
+        } else argv[positional++] = argv[i];
     }
+    argc = positional;
     unsigned long port, timeout = 1000, retries = 5, window_limit = 1;
     struct sockaddr_in peer;
     memset(&peer, 0, sizeof peer);
@@ -305,8 +352,11 @@ int main(int argc, char **argv)
         (argc >= 6 && (number(argv[4], 10, 10000, &timeout) ||
                        number(argv[5], 0, 20, &retries))) ||
         (argc == 7 && number(argv[6], 1, 256, &window_limit))) {
-        fprintf(stderr, "Usage: %s IPV4 PORT FILE [TIMEOUT_MS RETRIES [WINDOW_PACKETS]] [--trace CSV]\n", argv[0]);
+        fprintf(stderr, "Usage: %s IPV4 PORT FILE [TIMEOUT_MS RETRIES [WINDOW_PACKETS]] [--adaptive] [--trace CSV]\n", argv[0]);
         return 2;
+    }
+    if (adaptive && rudp_cc_init(&congestion, (unsigned)timeout, (unsigned)window_limit)) {
+        fprintf(stderr, "Adaptive initial RTO must be 1000-10000 ms.\n"); return 2;
     }
     peer.sin_port = htons((uint16_t)port);
     /* Nonblocking open also prevents a FIFO path from hanging before fstat. */
@@ -343,8 +393,11 @@ int main(int argc, char **argv)
         trace_file = fopen(trace_path, "wx");
         if (!trace_file) { perror("create trace (must be a new file)"); result = 2; goto done; }
         if (fprintf(trace_file, "schema_version,event_index,transfer_id,elapsed_ms,event,packet_type,"
-                    "sequence,base,next,receive_window,rto_ms,configured_window,retransmissions,probes\n") < 0)
+                    "sequence,base,next,receive_window,rto_ms,configured_window,retransmissions,probes") < 0)
             trace_failed = 1;
+        if (adaptive && fprintf(trace_file, ",rtt_sample_ms,srtt_ms,rttvar_ms,cwnd_packets,ssthresh_packets,effective_window_packets") < 0)
+            trace_failed = 1;
+        if (fputc('\n', trace_file) == EOF) trace_failed = 1;
     }
     trace_event("begin", 0, 0, 0, 0, 0);
     if (connect(fd, (struct sockaddr *)&peer, sizeof peer)) { perror("connect"); goto done; }

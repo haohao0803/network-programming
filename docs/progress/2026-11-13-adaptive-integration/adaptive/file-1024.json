@@ -1,0 +1,11 @@
+{
+  "scenario": "file-1024",
+  "bytes": 1024,
+  "sha256": "2088c3d369fa02f6d31b0c83bf8eac65e0ec4855348836d3d3b9e3284826bda3",
+  "sender_stdout": "PASS sender bytes=1024 chunks=1 retransmissions=0 probes=0 window=16 peak_inflight=1 elapsed_ms=6\n",
+  "sender_stderr": "",
+  "receiver_output": "READY 127.0.0.1:36448 pid=430\nPASS receiver bytes=1024 chunks=1 duplicates=0 peak_buffered=1\n",
+  "dropped": 0,
+  "sender_exit": 0,
+  "source_sha256": "2088c3d369fa02f6d31b0c83bf8eac65e0ec4855348836d3d3b9e3284826bda3"
+}

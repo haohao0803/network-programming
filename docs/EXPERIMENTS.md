@@ -62,7 +62,7 @@ python3 scripts/summarize_results.py results/normal-new/runs.jsonl \
 
 汇总生成 `summary.csv` 和 `goodput.svg`，按场景、窗口及文件大小分组。
 本机回环数据只用于验证流程与初步观察，不能作为真实公网性能或拥塞控制结论。
-当前窗口 16 仍是固定窗口基线，尚未接入 LPCAQ 的自适应计时与拥塞模块。
+上述批量命令的窗口 16 仍是固定窗口基线。整合分支已接入 LPCAQ 的 `--adaptive` 模块，但当前批量脚本未传入该选项，不能将其输出标记为自适应结果。实验负责人需补充模式选择、schema 2 日志采集和模式分组，并按退避上限配置接收端 idle 和整场时限；接口和单位见 [CONGESTION.md](CONGESTION.md)。
 
 ## Linux 服务器预检
 
