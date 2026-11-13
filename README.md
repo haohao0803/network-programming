@@ -8,9 +8,9 @@ Reliable UDP File Transfer and Network Performance Evaluation
 
 ## 当前状态
 
-2026-11-11 已确定方向、分工和第一版计划，提供最小 UDP 双向通信示例与检查脚本。文件传输、滑动窗口、流量控制和拥塞控制均待开发。
+本实验分支整合停止等待/固定窗口发送端与 Clive 的正式接收端，已在 Mac 完成严格 C11 构建、双方协议测试和 31 个真实两端联调场景。提供测试文件、SHA-256 校验、批量实验与结果汇总工具。自适应超时/拥塞模块、实际 Linux 服务器和跨机器验证仍待完成。见 [Mac 实测记录](docs/progress/2026-11-13-mac.md) 和 [实验复跑说明](docs/EXPERIMENTS.md)。
 
-目标申报 1.40 档，最终由老师认定。老师详细要求尚未发布，后续据此调整范围和验收标准。
+目标申报 1.40 档，最终由老师认定。已收到用户提供的汇报要求截图，落实方式见 [汇报要求记录](docs/PRESENTATION.md)；正式截止时间仍待确认。
 
 **内部截止为 2026-11-17 23:59，时区 Asia/Shanghai，2026-11-18 可演示。** 老师正式截止时间待确认。
 
@@ -42,6 +42,7 @@ git clone https://github.com/haohao0803/network-programming.git
 cd network-programming
 make
 make check
+make check-integration
 ```
 
 手动运行时，先在一个终端启动接收端，再在另一终端发送。
@@ -51,10 +52,26 @@ make check
 ./build/udp-probe send 127.0.0.1 19090
 ```
 
-当前示例只验证本机 UDP 双向收发，监听 127.0.0.1，等待上限 10 秒，接收一次后退出。文件传输 CLI 在后续联调中补充。
+当前探测示例只验证本机 UDP 双向收发，监听 127.0.0.1，等待上限 10 秒，接收一次后退出。
+
+停止等待发送端需配合遵循 [协议草案](docs/PROTOCOL.md) 的接收端；探测示例不能接收文件。
+
+```sh
+./build/rudp-send 127.0.0.1 19090 input.bin
+# 可选参数：单次等待毫秒数、额外重试次数
+./build/rudp-send 127.0.0.1 19090 input.bin 1000 5
+# 可选窗口上限（分片数）；默认 1，保留停止等待基线
+./build/rudp-send 127.0.0.1 19090 input.bin 1000 5 16
+```
+
+仅支持数字 IPv4 和不超过 1 GiB 的普通文件。传输期间保持源文件不变。退出码 0 表示获得完成确认，1 表示传输未确认成功，2 表示参数或输入文件错误。窗口上限为 1–256 个分片，缓存按上限分配，接收窗口进一步限制发送范围。默认超时 1 秒、额外重试 5 次；新累计确认会重置连续失败预算，重复 ACK 和窗口更新不延长等待。零窗口期间使用重复 START 或已确认 DATA 探测，连续无进展后失败。
+
+当前为固定超时、固定窗口的实验基线；LPCAQ 的计时与拥塞模块接入后，发送上限还会受 cwnd 约束。完整行为及接收端配合要求见 [协议草案](docs/PROTOCOL.md)。
 
 ## 开发资料
 
+- [实验工具、文件哈希与 Mac 验证](docs/EXPERIMENTS.md)
+- [正式接收端运行说明](docs/RECEIVER.md)
 - [小型 Ubuntu / Debian 服务器部署](docs/SERVER.md)
 - [分工、每日计划与验收](docs/PLAN.md)
 - [协议草案与接口讨论](docs/PROTOCOL.md)

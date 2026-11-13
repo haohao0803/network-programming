@@ -1,0 +1,40 @@
+{
+  "generator": "rudp-fixture-v1",
+  "files": [
+    {
+      "name": "payload-0.bin",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "payload-1.bin",
+      "size_bytes": 1,
+      "sha256": "1f184f101c67d585ba00d24cfde36863f747fbab9e84af7760ec771e9b36ca51"
+    },
+    {
+      "name": "payload-1023.bin",
+      "size_bytes": 1023,
+      "sha256": "0b47d595aae730917d04aeb146c3bdf53fea173fae200df0dd37c92428f54da8"
+    },
+    {
+      "name": "payload-1024.bin",
+      "size_bytes": 1024,
+      "sha256": "af51ae1a5a7209f9eb8320e23650229349cb61e6fcd014f320c8825a4c776b7c"
+    },
+    {
+      "name": "payload-1025.bin",
+      "size_bytes": 1025,
+      "sha256": "d960753708565a4be4ed40704005e0a364b490b0a5bfae8cf2a126e4ba6d6e7f"
+    },
+    {
+      "name": "payload-1048576.bin",
+      "size_bytes": 1048576,
+      "sha256": "ecd823833224d9f20341c0d9d6324182c8a687944bb00a1fb18a916af4006fc3"
+    },
+    {
+      "name": "payload-10485760.bin",
+      "size_bytes": 10485760,
+      "sha256": "69b9f9375afdd9564fc203589f129d023066fa5810ddf5449ac8410d69fe43f4"
+    }
+  ]
+}
