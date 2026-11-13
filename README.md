@@ -8,7 +8,7 @@ Reliable UDP File Transfer and Network Performance Evaluation
 
 ## 当前状态
 
-2026-11-11 已确定方向、分工和第一版计划，提供最小 UDP 双向通信示例与检查脚本。文件传输、滑动窗口、流量控制和拥塞控制均待开发。
+本分支为 Clive-111 的 `feature/receiver`，提供可靠 UDP 接收端、乱序缓存、去重、文件保存和接收窗口控制。与 `feature/sender` 提交 `b3a4b45` 的联调方法见 [接收端说明](docs/RECEIVER.md)。整组自适应超时、拥塞控制、平台与实验验收按各模块实际进展确认。
 
 目标申报 1.40 档，最终由老师认定。老师详细要求尚未发布，后续据此调整范围和验收标准。
 
@@ -38,7 +38,7 @@ Reliable UDP File Transfer and Network Performance Evaluation
 核心计划采用 C11、POSIX Socket 和 Make，实验工具使用 Python 3。Windows 在 WSL 2 Ubuntu 内操作，Mac 使用 Command Line Tools 的编译工具。
 
 ```sh
-git clone https://github.com/haohao0803/network-programming.git
+git clone --branch feature/receiver https://github.com/haohao0803/network-programming.git
 cd network-programming
 make
 make check
@@ -51,10 +51,11 @@ make check
 ./build/udp-probe send 127.0.0.1 19090
 ```
 
-当前示例只验证本机 UDP 双向收发，监听 127.0.0.1，等待上限 10 秒，接收一次后退出。文件传输 CLI 在后续联调中补充。
+上述 udp-probe 示例验证本机 UDP 双向收发，监听 127.0.0.1，等待上限 10 秒，接收一次后退出。真实文件传输使用 `build/rudp-recv`；编译、发送端工作目录、启动命令和 SHA-256 检查见 [接收端联调说明](docs/RECEIVER.md)。
 
 ## 开发资料
 
+- [Clive 接收端、运行命令与真实联调](docs/RECEIVER.md)
 - [小型 Ubuntu / Debian 服务器部署](docs/SERVER.md)
 - [分工、每日计划与验收](docs/PLAN.md)
 - [协议草案与接口讨论](docs/PROTOCOL.md)
