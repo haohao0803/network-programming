@@ -1,0 +1,2 @@
+READY 127.0.0.1:34620 pid=458
+PASS receiver bytes=65536 chunks=64 duplicates=0 peak_buffered=1

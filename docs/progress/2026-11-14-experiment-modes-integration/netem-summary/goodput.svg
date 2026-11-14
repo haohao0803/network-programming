@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1085" viewBox="0 0 1200 1085">
+<rect width="100%" height="100%" fill="white"/>
+<g font-family="sans-serif" fill="#17212b">
+<text x="24" y="32" font-size="20">Measured application goodput (successful runs only)</text>
+<text x="24" y="56" font-size="13">Sender CLI elapsed time excludes receiver linger. See CSV and raw logs for conditions.</text>
+<text x="24" y="90" font-size="13">adaptive / delay / w=1 / 65536 B</text>
+<rect x="480" y="75" width="5.94" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="90" font-size="12">9519 B/s (1/1 confirmed)</text>
+<text x="24" y="150" font-size="13">adaptive / delay / w=16 / 65536 B</text>
+<rect x="480" y="135" width="38.24" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="150" font-size="12">61323 B/s (1/1 confirmed)</text>
+<text x="24" y="210" font-size="13">adaptive / loss / w=1 / 65536 B</text>
+<rect x="480" y="195" width="18.40" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="210" font-size="12">29502 B/s (1/1 confirmed)</text>
+<text x="24" y="270" font-size="13">adaptive / loss / w=16 / 65536 B</text>
+<rect x="480" y="255" width="278.00" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="270" font-size="12">445777 B/s (1/1 confirmed)</text>
+<text x="24" y="330" font-size="13">adaptive / normal / w=1 / 65536 B</text>
+<rect x="480" y="315" width="223.23" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="330" font-size="12">357952 B/s (1/1 confirmed)</text>
+<text x="24" y="390" font-size="13">adaptive / normal / w=16 / 65536 B</text>
+<rect x="480" y="375" width="440.00" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="390" font-size="12">705551 B/s (1/1 confirmed)</text>
+<text x="24" y="450" font-size="13">adaptive / reorder-duplicate / w=1 / 65536 B</text>
+<rect x="480" y="435" width="15.82" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="450" font-size="12">25371 B/s (1/1 confirmed)</text>
+<text x="24" y="510" font-size="13">adaptive / reorder-duplicate / w=16 / 65536 B</text>
+<rect x="480" y="495" width="85.31" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="510" font-size="12">136793 B/s (1/1 confirmed)</text>
+<text x="24" y="570" font-size="13">fixed / delay / w=1 / 65536 B</text>
+<rect x="480" y="555" width="5.91" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="570" font-size="12">9482 B/s (1/1 confirmed)</text>
+<text x="24" y="630" font-size="13">fixed / delay / w=16 / 65536 B</text>
+<rect x="480" y="615" width="61.30" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="630" font-size="12">98296 B/s (1/1 confirmed)</text>
+<text x="24" y="690" font-size="13">fixed / loss / w=1 / 65536 B</text>
+<rect x="480" y="675" width="18.40" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="690" font-size="12">29501 B/s (1/1 confirmed)</text>
+<text x="24" y="750" font-size="13">fixed / loss / w=16 / 65536 B</text>
+<rect x="480" y="735" width="323.78" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="750" font-size="12">519192 B/s (1/1 confirmed)</text>
+<text x="24" y="810" font-size="13">fixed / normal / w=1 / 65536 B</text>
+<rect x="480" y="795" width="292.08" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="810" font-size="12">468356 B/s (1/1 confirmed)</text>
+<text x="24" y="870" font-size="13">fixed / normal / w=16 / 65536 B</text>
+<rect x="480" y="855" width="320.34" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="870" font-size="12">513668 B/s (1/1 confirmed)</text>
+<text x="24" y="930" font-size="13">fixed / reorder-duplicate / w=1 / 65536 B</text>
+<rect x="480" y="915" width="15.88" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="930" font-size="12">25465 B/s (1/1 confirmed)</text>
+<text x="24" y="990" font-size="13">fixed / reorder-duplicate / w=16 / 65536 B</text>
+<rect x="480" y="975" width="126.77" height="22" rx="3" fill="#2479ae"/>
+<text x="940" y="990" font-size="12">203286 B/s (1/1 confirmed)</text>
+</g></svg>

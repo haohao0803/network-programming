@@ -1,0 +1,141 @@
+{
+  "purpose": "Linux integration smoke only; one repeat, not a performance conclusion",
+  "source_commit": "6a5b1ab91b2101ea8806c3063aaa279f53c45f48",
+  "source_bytes": 65536,
+  "source_sha256": "a36b2adfd887436a920b9616dd57a4703cfb5a1fddb9e74e95d4f6a001c10e46",
+  "scenarios": [
+    {
+      "scenario": "normal",
+      "confirmed": 4,
+      "attempts": 4,
+      "qdisc_packets": 528,
+      "qdisc_drops": 0,
+      "runs": [
+        {
+          "mode": "fixed",
+          "window": 1,
+          "retransmissions": 0,
+          "schema": 1
+        },
+        {
+          "mode": "fixed",
+          "window": 16,
+          "retransmissions": 0,
+          "schema": 1
+        },
+        {
+          "mode": "adaptive",
+          "window": 1,
+          "retransmissions": 0,
+          "schema": 2
+        },
+        {
+          "mode": "adaptive",
+          "window": 16,
+          "retransmissions": 0,
+          "schema": 2
+        }
+      ]
+    },
+    {
+      "scenario": "delay",
+      "confirmed": 4,
+      "attempts": 4,
+      "qdisc_packets": 528,
+      "qdisc_drops": 0,
+      "runs": [
+        {
+          "mode": "fixed",
+          "window": 1,
+          "retransmissions": 0,
+          "schema": 1
+        },
+        {
+          "mode": "fixed",
+          "window": 16,
+          "retransmissions": 0,
+          "schema": 1
+        },
+        {
+          "mode": "adaptive",
+          "window": 1,
+          "retransmissions": 0,
+          "schema": 2
+        },
+        {
+          "mode": "adaptive",
+          "window": 16,
+          "retransmissions": 0,
+          "schema": 2
+        }
+      ]
+    },
+    {
+      "scenario": "loss",
+      "confirmed": 4,
+      "attempts": 4,
+      "qdisc_packets": 525,
+      "qdisc_drops": 9,
+      "runs": [
+        {
+          "mode": "fixed",
+          "window": 1,
+          "retransmissions": 2,
+          "schema": 1
+        },
+        {
+          "mode": "fixed",
+          "window": 16,
+          "retransmissions": 0,
+          "schema": 1
+        },
+        {
+          "mode": "adaptive",
+          "window": 1,
+          "retransmissions": 2,
+          "schema": 2
+        },
+        {
+          "mode": "adaptive",
+          "window": 16,
+          "retransmissions": 0,
+          "schema": 2
+        }
+      ]
+    },
+    {
+      "scenario": "reorder-duplicate",
+      "confirmed": 4,
+      "attempts": 4,
+      "qdisc_packets": 547,
+      "qdisc_drops": 0,
+      "runs": [
+        {
+          "mode": "fixed",
+          "window": 1,
+          "retransmissions": 0,
+          "schema": 1
+        },
+        {
+          "mode": "fixed",
+          "window": 16,
+          "retransmissions": 0,
+          "schema": 1
+        },
+        {
+          "mode": "adaptive",
+          "window": 1,
+          "retransmissions": 0,
+          "schema": 2
+        },
+        {
+          "mode": "adaptive",
+          "window": 16,
+          "retransmissions": 0,
+          "schema": 2
+        }
+      ]
+    }
+  ],
+  "verified_runs": 16
+}

@@ -1,0 +1,19 @@
+{
+  "topology": "Both C endpoints in one isolated Linux network namespace on lo",
+  "qdisc_command": [
+    "tc",
+    "qdisc",
+    "replace",
+    "dev",
+    "lo",
+    "root",
+    "netem"
+  ],
+  "seed": 20261114,
+  "modes": [
+    "fixed",
+    "adaptive"
+  ],
+  "kernel": "6.18.33.2-microsoft-standard-WSL2",
+  "note": "qdisc applies to requests and replies; 50ms per packet gives about 100ms RTT. Seed does not make process scheduling or packet order identical."
+}

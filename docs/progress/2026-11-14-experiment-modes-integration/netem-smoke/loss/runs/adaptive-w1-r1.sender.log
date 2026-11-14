@@ -1,0 +1,3 @@
+PASS sender bytes=65536 chunks=64 retransmissions=2 probes=0 window=1 peak_inflight=1 elapsed_ms=2207
+timeout DATA base=41 next=42 window=23 retry=1/2
+timeout DATA base=60 next=61 window=4 retry=1/2
