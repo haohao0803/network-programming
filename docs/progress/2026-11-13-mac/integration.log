@@ -1,0 +1,47 @@
+python3 tests/test_transfer.py ./build/rudp-send ./build/rudp-recv
+test_all_fin_ack_loss_preserves_saved_file (__main__.TransferTests) ... PASS transfer scenario=drop-all-FIN_ACK bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=1 receiver=0 outcome=receiver-saved-sender-unconfirmed
+ok
+test_both_window_limits (__main__.TransferTests) ... PASS transfer scenario=window-8-2 bytes=307213 sha256=64cab97e3d77fdb95b195d05ab128b22cc81ee7dba1f2895c4feab4f09ac8779 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=window-2-8 bytes=307213 sha256=64cab97e3d77fdb95b195d05ab128b22cc81ee7dba1f2895c4feab4f09ac8779 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=window-256-256 bytes=307213 sha256=64cab97e3d77fdb95b195d05ab128b22cc81ee7dba1f2895c4feab4f09ac8779 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=window-4-1 bytes=307213 sha256=64cab97e3d77fdb95b195d05ab128b22cc81ee7dba1f2895c4feab4f09ac8779 sender=0 receiver=0 outcome=confirmed
+ok
+test_file_hashes_stop_and_wait_and_windowed (__main__.TransferTests) ... PASS transfer scenario=hash-window-1-0 bytes=0 sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-1-1 bytes=1 sha256=8a5edab282632443219e051e4ade2d1d5bbc671c781051bf1437897cbdfea0f1 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-1-1024 bytes=1024 sha256=fa4f399ff18e0989c49a4be0b063fe3b7c07e5b2e1a93c46413b2f3df355b50f sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-1-1025 bytes=1025 sha256=bd07aeee6b4ba50a8e8b54d5e48c01c87741b486fd28deebfa25a3b16b0647c8 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-1-1048576 bytes=1048576 sha256=78d40afca0df69f287b8863351245f80374bf71d694b7f4176c031ce5947cb28 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-1-10485760 bytes=10485760 sha256=496a66b63298467dd62e8dc4d704bd98da178c26301273d93624970cf3288257 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-0 bytes=0 sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-1 bytes=1 sha256=8a5edab282632443219e051e4ade2d1d5bbc671c781051bf1437897cbdfea0f1 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-1024 bytes=1024 sha256=fa4f399ff18e0989c49a4be0b063fe3b7c07e5b2e1a93c46413b2f3df355b50f sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-1025 bytes=1025 sha256=bd07aeee6b4ba50a8e8b54d5e48c01c87741b486fd28deebfa25a3b16b0647c8 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-1048576 bytes=1048576 sha256=78d40afca0df69f287b8863351245f80374bf71d694b7f4176c031ce5947cb28 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-10485760 bytes=10485760 sha256=496a66b63298467dd62e8dc4d704bd98da178c26301273d93624970cf3288257 sender=0 receiver=0 outcome=confirmed
+ok
+test_fin_works_while_paused (__main__.TransferTests) ... PASS transfer scenario=paused-empty-file bytes=0 sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=paused-before-fin bytes=1025 sha256=bd07aeee6b4ba50a8e8b54d5e48c01c87741b486fd28deebfa25a3b16b0647c8 sender=0 receiver=0 outcome=confirmed
+ok
+test_loss_of_each_request_and_confirmation (__main__.TransferTests) ... PASS transfer scenario=drop-first-START bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=drop-first-START_ACK bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=drop-first-DATA bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=drop-first-ACK bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=drop-first-FIN bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=drop-first-FIN_ACK bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+ok
+test_permanent_pause_fails_within_budget (__main__.TransferTests) ... PASS transfer scenario=zero-permanent bytes=1025 sha256=None sender=1 receiver=1 outcome=bounded-failure
+ok
+test_reordering_and_duplicates (__main__.TransferTests) ... PASS transfer scenario=reorder-duplicate bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+ok
+test_zero_window_and_lost_resume_notifications (__main__.TransferTests) ... PASS transfer scenario=zero-initial-drop-resume-0 bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=zero-initial-drop-resume-1 bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=zero-middle-drop-resume-0 bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=zero-middle-drop-resume-1 bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 56.697s
+
+OK
+Integration scenarios completed: 31; success=True
+exit=0

@@ -1,0 +1,33 @@
+{
+  "run_id": "w1-r1",
+  "scenario": "normal",
+  "window": 1,
+  "repeat": 1,
+  "source_bytes": 1024,
+  "source_sha256": "af51ae1a5a7209f9eb8320e23650229349cb61e6fcd014f320c8825a4c776b7c",
+  "sender_command": [
+    "/Users/wangzongyan/Documents/\u7f51\u7edc\u7f16\u7a0b/network-programming/build/rudp-send",
+    "127.0.0.1",
+    "61782",
+    "/Users/wangzongyan/Documents/\u7f51\u7edc\u7f16\u7a0b/network-programming/test-data/mac-validation/payload-1024.bin",
+    "1000",
+    "5",
+    "1"
+  ],
+  "receiver_command": [
+    "/usr/bin/false",
+    "127.0.0.1",
+    "61782",
+    "/Users/wangzongyan/Documents/\u7f51\u7edc\u7f16\u7a0b/network-programming/results/startup-failure/w1-r1.received",
+    "64",
+    "15000",
+    "7000"
+  ],
+  "sender_exit": null,
+  "receiver_exit": 1,
+  "sender_seconds": null,
+  "output_sha256": null,
+  "goodput_Bps": null,
+  "success": false,
+  "error": "receiver exited before READY"
+}

@@ -1,0 +1,13 @@
+Linux haohao 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Copyright (C) 2023 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Python 3.12.3
+9d91c63c6d946b9e9bd043a6ed0e755b9d45efc0781f27325922d47ab4b498c9  src/sender.c
+615ecbaa49989c8c63ac10d65fd5a1e3a27cdc2e9a95da139a0704c4be88d3ea  src/receiver.c
+242e3a37ae7375a0845a7e94cb16804946bae29eaefaefb13805dc215a61d753  src/congestion.c
+d7b10b48f07f70ea7b0e3f097739d4ae842931c3edba33edb6ebeedf9591ed97  tests/test_adaptive_sender_contract.py
+5bc34942e88b90dc977fe7cf189f81eb3d6413949fcb43ba3f56d9118840462f  build/rudp-send
+8d4d3b728d662a4443292f4cd24165345c313570377d3c70c55ccf12695cc289  build/rudp-recv

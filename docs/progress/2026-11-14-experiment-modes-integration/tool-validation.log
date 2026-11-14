@@ -1,0 +1,13 @@
+python3 tests/test_experiments.py
+test_adaptive_silence_and_control_budgets (__main__.ExperimentTests.test_adaptive_silence_and_control_budgets) ... ok
+test_invalid_adaptive_config_fails_before_creating_results (__main__.ExperimentTests.test_invalid_adaptive_config_fails_before_creating_results) ... ok
+test_netem_forwards_modes_and_timeout_through_namespace (__main__.ExperimentTests.test_netem_forwards_modes_and_timeout_through_namespace) ... ok
+test_real_modes_save_separate_parameter_logs_and_hashes (__main__.ExperimentTests.test_real_modes_save_separate_parameter_logs_and_hashes) ... ok
+test_summary_separates_modes_and_supports_legacy_records (__main__.ExperimentTests.test_summary_separates_modes_and_supports_legacy_records) ... ok
+test_trace_schema_and_empty_or_malformed_logs (__main__.ExperimentTests.test_trace_schema_and_empty_or_malformed_logs) ... ok
+test_wall_timeout_is_saved_as_failure (__main__.ExperimentTests.test_wall_timeout_is_saved_as_failure) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 10.679s
+
+OK

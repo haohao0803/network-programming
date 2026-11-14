@@ -1,0 +1,135 @@
+Integrated source: prior HEAD plus LPCAQ edd81996
+2026-11-13T20:25:05+08:00
+Linux haohao 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/sender.c src/congestion.c  -o build/rudp-send
+mkdir -p "/tmp"
+python3 scripts/check_probe.py ./build/udp-probe
+PASS UDP loopback round trip
+READY 127.0.0.1:40475
+PASS UDP loopback round trip
+PASS invalid port and silent-peer timeout
+mkdir -p "/tmp"
+python3 tests/test_sender.py ./build/rudp-send
+test_boundary_hashes (__main__.SenderTests.test_boundary_hashes) ... ok
+test_bounded_failures (__main__.SenderTests.test_bounded_failures) ... ok
+test_empty_file_with_zero_window (__main__.SenderTests.test_empty_file_with_zero_window) ... ok
+test_invalid_cli_and_files (__main__.SenderTests.test_invalid_cli_and_files) ... ok
+test_invalid_confirmations_do_not_advance_state (__main__.SenderTests.test_invalid_confirmations_do_not_advance_state) ... ok
+test_lost_confirmations_and_data (__main__.SenderTests.test_lost_confirmations_and_data) ... ok
+test_malformed_stale_and_foreign_packets (__main__.SenderTests.test_malformed_stale_and_foreign_packets) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 5.523s
+
+OK
+python3 tests/test_sender_window.py ./build/rudp-send
+test_changed_input_does_not_send_completion (__main__.WindowSenderTests.test_changed_input_does_not_send_completion) ... ok
+test_empty_and_boundary_files (__main__.WindowSenderTests.test_empty_and_boundary_files) ... ok
+test_gap_retransmission_and_window_shrink (__main__.WindowSenderTests.test_gap_retransmission_and_window_shrink) ... ok
+test_invalid_window_arguments (__main__.WindowSenderTests.test_invalid_window_arguments) ... ok
+test_multiple_inflight_and_both_window_limits (__main__.WindowSenderTests.test_multiple_inflight_and_both_window_limits) ... ok
+test_no_progress_is_bounded (__main__.WindowSenderTests.test_no_progress_is_bounded) ... ok
+test_reordering_duplicates_and_stale_window (__main__.WindowSenderTests.test_reordering_duplicates_and_stale_window) ... ok
+test_zero_window_probe_and_recovery (__main__.WindowSenderTests.test_zero_window_probe_and_recovery) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 2.647s
+
+OK
+python3 tests/test_sender_trace.py ./build/rudp-send
+test_existing_input_and_log_are_never_overwritten (__main__.TraceTests.test_existing_input_and_log_are_never_overwritten) ... ok
+test_lost_control_ack_trace (__main__.TraceTests.test_lost_control_ack_trace) ... ok
+test_success_and_zero_window_trace (__main__.TraceTests.test_success_and_zero_window_trace) ... ok
+test_trace_with_default_network_parameters (__main__.TraceTests.test_trace_with_default_network_parameters) ... ok
+test_trace_write_failure_is_reported (__main__.TraceTests.test_trace_write_failure_is_reported) ... ok
+test_unconfirmed_finish_is_failed_in_trace (__main__.TraceTests.test_unconfirmed_finish_is_failed_in_trace) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 1.129s
+
+OK
+mkdir -p "/tmp"
+python3 tests/test_receiver.py ./build/rudp-recv
+test_disappearing_peer_cleans_partial_file (__main__.ReceiverTests.test_disappearing_peer_cleans_partial_file) ... ok
+test_duplicate_start_and_conflicting_metadata_preserve_progress (__main__.ReceiverTests.test_duplicate_start_and_conflicting_metadata_preserve_progress) ... ok
+test_early_and_invalid_fin_do_not_publish (__main__.ReceiverTests.test_early_and_invalid_fin_do_not_publish) ... ok
+test_existing_target_and_invalid_parent_are_rejected (__main__.ReceiverTests.test_existing_target_and_invalid_parent_are_rejected) ... ok
+test_initial_zero_window_probes_and_recovery (__main__.ReceiverTests.test_initial_zero_window_probes_and_recovery) ... ok
+test_invalid_cli_and_occupied_port (__main__.ReceiverTests.test_invalid_cli_and_occupied_port) ... ok
+test_malformed_and_foreign_packets_preserve_session (__main__.ReceiverTests.test_malformed_and_foreign_packets_preserve_session) ... ok
+test_mid_transfer_zero_window_retains_cache_and_deduplicates_probes (__main__.ReceiverTests.test_mid_transfer_zero_window_retains_cache_and_deduplicates_probes) ... ok
+test_noise_duplicate_requests_and_signals_do_not_extend_idle_deadline (__main__.ReceiverTests.test_noise_duplicate_requests_and_signals_do_not_extend_idle_deadline) ... ok
+test_paused_empty_and_complete_files_still_finish (__main__.ReceiverTests.test_paused_empty_and_complete_files_still_finish) ... ok
+test_reordering_duplicates_and_window_span (__main__.ReceiverTests.test_reordering_duplicates_and_window_span) ... ok
+test_repeated_fin_is_confirmed_without_extending_linger (__main__.ReceiverTests.test_repeated_fin_is_confirmed_without_extending_linger) ... ok
+test_saved_file_hashes_and_boundary_lengths (__main__.ReceiverTests.test_saved_file_hashes_and_boundary_lengths) ... ok
+test_target_created_during_transfer_is_preserved (__main__.ReceiverTests.test_target_created_during_transfer_is_preserved) ... ok
+test_termination_cleans_partial_file (__main__.ReceiverTests.test_termination_cleans_partial_file) ... ok
+test_write_failure_reports_error_and_cleans_partial_file (__main__.ReceiverTests.test_write_failure_reports_error_and_cleans_partial_file) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 3.371s
+
+OK
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -O2 tests/test_congestion.c src/congestion.c  -o build/test-congestion
+./build/test-congestion
+PASS congestion: RTT formula, Karn input, duplicate ACK, slow start, congestion avoidance, loss, persist, caps
+mkdir -p "/tmp"
+python3 tests/test_transfer.py "/mnt/c/Users/29806/Downloads/网络编程/network-programming/build/rudp-send" ./build/rudp-recv
+test_all_fin_ack_loss_preserves_saved_file (__main__.TransferTests.test_all_fin_ack_loss_preserves_saved_file) ... PASS transfer scenario=drop-all-FIN_ACK bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=1 receiver=0 outcome=receiver-saved-sender-unconfirmed
+ok
+test_both_window_limits (__main__.TransferTests.test_both_window_limits) ... PASS transfer scenario=window-8-2 bytes=307213 sha256=64cab97e3d77fdb95b195d05ab128b22cc81ee7dba1f2895c4feab4f09ac8779 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=window-2-8 bytes=307213 sha256=64cab97e3d77fdb95b195d05ab128b22cc81ee7dba1f2895c4feab4f09ac8779 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=window-256-256 bytes=307213 sha256=64cab97e3d77fdb95b195d05ab128b22cc81ee7dba1f2895c4feab4f09ac8779 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=window-4-1 bytes=307213 sha256=64cab97e3d77fdb95b195d05ab128b22cc81ee7dba1f2895c4feab4f09ac8779 sender=0 receiver=0 outcome=confirmed
+ok
+test_file_hashes_stop_and_wait_and_windowed (__main__.TransferTests.test_file_hashes_stop_and_wait_and_windowed) ... PASS transfer scenario=hash-window-1-0 bytes=0 sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-1-1 bytes=1 sha256=8a5edab282632443219e051e4ade2d1d5bbc671c781051bf1437897cbdfea0f1 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-1-1024 bytes=1024 sha256=fa4f399ff18e0989c49a4be0b063fe3b7c07e5b2e1a93c46413b2f3df355b50f sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-1-1025 bytes=1025 sha256=bd07aeee6b4ba50a8e8b54d5e48c01c87741b486fd28deebfa25a3b16b0647c8 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-1-1048576 bytes=1048576 sha256=78d40afca0df69f287b8863351245f80374bf71d694b7f4176c031ce5947cb28 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-1-10485760 bytes=10485760 sha256=496a66b63298467dd62e8dc4d704bd98da178c26301273d93624970cf3288257 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-0 bytes=0 sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-1 bytes=1 sha256=8a5edab282632443219e051e4ade2d1d5bbc671c781051bf1437897cbdfea0f1 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-1024 bytes=1024 sha256=fa4f399ff18e0989c49a4be0b063fe3b7c07e5b2e1a93c46413b2f3df355b50f sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-1025 bytes=1025 sha256=bd07aeee6b4ba50a8e8b54d5e48c01c87741b486fd28deebfa25a3b16b0647c8 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-1048576 bytes=1048576 sha256=78d40afca0df69f287b8863351245f80374bf71d694b7f4176c031ce5947cb28 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=hash-window-8-10485760 bytes=10485760 sha256=496a66b63298467dd62e8dc4d704bd98da178c26301273d93624970cf3288257 sender=0 receiver=0 outcome=confirmed
+ok
+test_fin_works_while_paused (__main__.TransferTests.test_fin_works_while_paused) ... PASS transfer scenario=paused-empty-file bytes=0 sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=paused-before-fin bytes=1025 sha256=bd07aeee6b4ba50a8e8b54d5e48c01c87741b486fd28deebfa25a3b16b0647c8 sender=0 receiver=0 outcome=confirmed
+ok
+test_loss_of_each_request_and_confirmation (__main__.TransferTests.test_loss_of_each_request_and_confirmation) ... PASS transfer scenario=drop-first-START bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=drop-first-START_ACK bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=drop-first-DATA bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=drop-first-ACK bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=drop-first-FIN bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=drop-first-FIN_ACK bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+ok
+test_permanent_pause_fails_within_budget (__main__.TransferTests.test_permanent_pause_fails_within_budget) ... PASS transfer scenario=zero-permanent bytes=1025 sha256=None sender=1 receiver=1 outcome=bounded-failure
+ok
+test_reordering_and_duplicates (__main__.TransferTests.test_reordering_and_duplicates) ... PASS transfer scenario=reorder-duplicate bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+ok
+test_zero_window_and_lost_resume_notifications (__main__.TransferTests.test_zero_window_and_lost_resume_notifications) ... PASS transfer scenario=zero-initial-drop-resume-0 bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=zero-initial-drop-resume-1 bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=zero-middle-drop-resume-0 bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+PASS transfer scenario=zero-middle-drop-resume-1 bytes=32781 sha256=21fd6475fa5e9c6296b708ac6d59a64f58b4a5d24b6f6bd5d16f074490e0f446 sender=0 receiver=0 outcome=confirmed
+ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 58.114s
+
+OK
+Integration scenarios completed: 31; success=True
+python3 tests/test_trace_transfer.py "/mnt/c/Users/29806/Downloads/网络编程/network-programming/build/rudp-send" ./build/rudp-recv
+test_real_output_and_trace_agree (__main__.TraceTransferTests.test_real_output_and_trace_agree) ... PASS traced-transfer window=1 bytes=4097 sha256=b574ebff706803df9f0a526bdd804c9eba68c5006891005ed3221e4816db1aa6 rows=16
+PASS traced-transfer window=4 bytes=4097 sha256=b574ebff706803df9f0a526bdd804c9eba68c5006891005ed3221e4816db1aa6 rows=16
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.560s
+
+OK
+make: *** No rule to make target 'check-adaptive'.  Stop.

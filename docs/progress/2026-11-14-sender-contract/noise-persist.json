@@ -1,0 +1,9 @@
+{
+  "exit": 1,
+  "seconds": 3.010333141000018,
+  "stdout": "",
+  "stderr": "timeout DATA base=0 next=0 window=0 retry=1/1\nDATA/probe retry budget exhausted at sequence=0; transfer not confirmed.\n",
+  "source_hex": "00",
+  "fixture_received_hex": "",
+  "peer_is_fixture": true
+}

@@ -1,0 +1,17 @@
+/usr/bin/ping
+tc utility, iproute2-6.1.0, libbpf 1.3.0
+What is "seed"?
+Usage: ... netem [ limit PACKETS ]
+                 [ delay TIME [ JITTER [CORRELATION]]]
+                 [ distribution {uniform|normal|pareto|paretonormal} ]
+                 [ corrupt PERCENT [CORRELATION]]
+                 [ duplicate PERCENT [CORRELATION]]
+                 [ loss random PERCENT [CORRELATION]]
+                 [ loss state P13 [P31 [P32 [P23 P14]]]
+                 [ loss gemodel PERCENT [R [1-H [1-K]]]
+                 [ ecn ]
+                 [ reorder PERCENT [CORRELATION] [ gap DISTANCE ]]
+                 [ rate RATE [PACKETOVERHEAD] [CELLSIZE] [CELLOVERHEAD]]
+                 [ slot MIN_DELAY [MAX_DELAY] [packets MAX_PACKETS] [bytes MAX_BYTES]]
+                 [ slot distribution {uniform|normal|pareto|paretonormal|custom}
+                   DELAY JITTER [packets MAX_PACKETS] [bytes MAX_BYTES]]

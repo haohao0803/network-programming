@@ -8,9 +8,13 @@ Reliable UDP File Transfer and Network Performance Evaluation
 
 ## 当前状态
 
-2026-11-11 已确定方向、分工和第一版计划，提供最小 UDP 双向通信示例与检查脚本。文件传输、滑动窗口、流量控制和拥塞控制均待开发。
+`integration/file-transfer` 整合 haohao0803 的发送端、Clive-111 的接收端、LPCAQ 的自适应参数模块，以及 bushi510 的 Mac 修复和实验工具。支持停止等待、固定滑动窗口、累计 ACK、超时回退重传、乱序缓存、去重、文件保存和零窗口恢复；可用 `--adaptive` 启用自适应 RTT/RTO 与拥塞控制，并记录参数 CSV。
 
-目标申报 1.40 档，最终由老师认定。老师详细要求尚未发布，后续据此调整范围和验收标准。
+固定及自适应模式已完成本机真实两端验证，Ubuntu/macOS CI 也已通过；范围见 [整合指南](docs/INTEGRATION.md) 和 [自适应集成记录](docs/progress/2026-11-13-adaptive-integration.md)。实际 VPS、跨机器验证、正式弱网/竞争流量实验及最终汇报仍待完成。目标版本继续由组员审阅后再合入 main。
+
+bushi510 的实验工具已支持固定/自适应模式选择、独立参数日志、按模式分组及相应超时预算，见 [EXPERIMENTS.md](docs/EXPERIMENTS.md)。历史 Mac 实测记录与当前 CI 分别对应各自源码版本，不能代替实际跨机器验证或正式性能实验。
+
+目标申报 1.40 档，最终由老师认定。已收到用户提供的汇报要求截图，落实方式见 [汇报要求记录](docs/PRESENTATION.md)；正式截止时间仍待确认。
 
 **内部截止为 2026-11-17 23:59，时区 Asia/Shanghai，2026-11-18 可演示。** 老师正式截止时间待确认。
 
@@ -26,8 +30,8 @@ Reliable UDP File Transfer and Network Performance Evaluation
 
 | 成员 | 环境 | 主责 |
 | --- | --- | --- |
-| [haohao0803](https://github.com/haohao0803) | Windows / WSL 2 Ubuntu | 发送端、发送窗口、ACK 处理、重传调度、项目集成 |
-| [Clive-111](https://github.com/Clive-111) | Windows / WSL 2 Ubuntu | 接收端、乱序缓存、去重、文件重组、流量控制 |
+| [haohao0803](https://github.com/haohao0803) | Windows / WSL 2 Ubuntu | 组长；发送端、发送窗口、ACK 处理、重传调度、项目集成 |
+| [Clive-111](https://github.com/Clive-111) | Windows / WSL 2 Ubuntu | 接收端、乱序缓存、去重、文件重组、流量控制；VPS 所有人，负责部署和预检 |
 | [LPCAQ](https://github.com/LPCAQ) | Windows / WSL 2 Ubuntu | RTT/RTO、拥塞控制、参数日志 |
 | [bushi510](https://github.com/bushi510) | macOS | 测试工具、实验自动化、图表、Mac 兼容性验证 |
 
@@ -38,10 +42,14 @@ Reliable UDP File Transfer and Network Performance Evaluation
 核心计划采用 C11、POSIX Socket 和 Make，实验工具使用 Python 3。Windows 在 WSL 2 Ubuntu 内操作，Mac 使用 Command Line Tools 的编译工具。
 
 ```sh
-git clone https://github.com/haohao0803/network-programming.git
+git clone --branch integration/file-transfer https://github.com/haohao0803/network-programming.git
 cd network-programming
 make
 make check
+# 真实 C 两端的故障注入联调，约需一分钟
+make check-integration
+# 自适应参数、发送端边界及真实两端验证
+make check-adaptive
 ```
 
 手动运行时，先在一个终端启动接收端，再在另一终端发送。
@@ -51,10 +59,34 @@ make check
 ./build/udp-probe send 127.0.0.1 19090
 ```
 
-当前示例只验证本机 UDP 双向收发，监听 127.0.0.1，等待上限 10 秒，接收一次后退出。文件传输 CLI 在后续联调中补充。
+当前探测示例只验证本机 UDP 双向收发，监听 127.0.0.1，等待上限 10 秒，接收一次后退出。
+
+真实文件传输时，先在终端 A 启动接收端（目标文件须尚未存在），再在终端 B 发送：
+
+```sh
+# 终端 A
+mkdir -p outputs
+./build/rudp-recv 127.0.0.1 19090 outputs/received.bin
+# 终端 B，input.bin 替换为准备好的普通文件
+./build/rudp-send 127.0.0.1 19090 input.bin 1000 5 4
+sha256sum input.bin outputs/received.bin
+# macOS 用 shasum -a 256 替代 sha256sum
+```
+
+接收端收到完整数据并保存成功后返回 FIN_ACK，继续保留默认 7 秒的完成状态。发送端窗口参数省略时为 1；可在末尾加 `--trace results/NEW_RUN.csv`，先创建 results 目录并使用新文件名。完整说明见 [整合运行指南](docs/INTEGRATION.md)。
+
+发送端仅支持数字 IPv4 和不超过 1 GiB 的普通文件。传输期间保持源文件不变。退出码 0 表示获得完成确认且所请求日志保存成功，1 表示传输或日志运行错误（stderr 区分是否已获得完成确认），2 表示参数、输入文件或日志创建错误。窗口上限为 1–256 个分片，缓存按上限分配，接收窗口进一步限制发送范围。默认超时 1 秒、额外重试 5 次；新累计确认会重置连续失败预算，重复 ACK 和窗口更新不延长等待。零窗口期间使用重复 START 或已确认 DATA 探测，连续无进展后失败。
+
+默认固定超时、固定窗口作为实验基线；`--adaptive` 模式的发送上限还受 cwnd 约束，DATA 使用自适应 RTO，START/FIN 保持固定计时。运行预算与参数日志见 [CONGESTION.md](docs/CONGESTION.md)。完整协议及接收端配合要求见 [协议草案](docs/PROTOCOL.md)。
 
 ## 开发资料
 
+- [LPCAQ 自适应 RTT/RTO、拥塞接口、单位与参数日志](docs/CONGESTION.md)：`--adaptive` 启用，`make check-adaptive` 验证；固定模式保留用于对照。
+- [整合构建、运行与验证](docs/INTEGRATION.md)
+- [发送端 CSV 事件说明](docs/SENDER_TRACE.md)
+- [实验工具与组员 Mac 证据](docs/EXPERIMENTS.md)
+- [本项目 tc 6.15 与固定种子环境](docs/LOCAL_TC.md)
+- [Clive 接收端、运行命令与真实联调](docs/RECEIVER.md)
 - [小型 Ubuntu / Debian 服务器部署](docs/SERVER.md)
 - [分工、每日计划与验收](docs/PLAN.md)
 - [协议草案与接口讨论](docs/PROTOCOL.md)

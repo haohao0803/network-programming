@@ -1,0 +1,4 @@
+fixed-w1-r1 success=True sender_seconds=2.2214555600000097
+fixed-w16-r1 success=True sender_seconds=0.12622690099999545
+adaptive-w1-r1 success=True sender_seconds=2.2213974480000047
+adaptive-w16-r1 success=True sender_seconds=0.1470153729999879

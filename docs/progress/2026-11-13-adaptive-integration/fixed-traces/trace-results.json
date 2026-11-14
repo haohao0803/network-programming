@@ -1,0 +1,30 @@
+{
+  "sender_binary_sha256": "5bc34942e88b90dc977fe7cf189f81eb3d6413949fcb43ba3f56d9118840462f",
+  "receiver_binary_sha256": "8d4d3b728d662a4443292f4cd24165345c313570377d3c70c55ccf12695cc289",
+  "records": [
+    {
+      "sender_window": 1,
+      "bytes": 4097,
+      "source_sha256": "b574ebff706803df9f0a526bdd804c9eba68c5006891005ed3221e4816db1aa6",
+      "output_sha256": "b574ebff706803df9f0a526bdd804c9eba68c5006891005ed3221e4816db1aa6",
+      "sender_exit": 0,
+      "receiver_exit": 0,
+      "trace_rows": 16,
+      "trace_sha256": "a7d91d2b56b385245e4799faeafeb9e842811b6841fc95ef921024f057bb757b",
+      "sender_stdout": "PASS sender bytes=4097 chunks=5 retransmissions=0 probes=0 window=1 peak_inflight=1 elapsed_ms=5\n",
+      "receiver_stdout": "READY 127.0.0.1:55551 pid=742\nPASS receiver bytes=4097 chunks=5 duplicates=0 peak_buffered=1\n"
+    },
+    {
+      "sender_window": 4,
+      "bytes": 4097,
+      "source_sha256": "b574ebff706803df9f0a526bdd804c9eba68c5006891005ed3221e4816db1aa6",
+      "output_sha256": "b574ebff706803df9f0a526bdd804c9eba68c5006891005ed3221e4816db1aa6",
+      "sender_exit": 0,
+      "receiver_exit": 0,
+      "trace_rows": 16,
+      "trace_sha256": "e39885457fe52fb96f583b8e8d9fc18d9c34f5f05952ffa91cc3c351b1c44ddf",
+      "sender_stdout": "PASS sender bytes=4097 chunks=5 retransmissions=0 probes=0 window=4 peak_inflight=4 elapsed_ms=4\n",
+      "receiver_stdout": "READY 127.0.0.1:41005 pid=745\nPASS receiver bytes=4097 chunks=5 duplicates=0 peak_buffered=1\n"
+    }
+  ]
+}

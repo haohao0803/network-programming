@@ -1,0 +1,3 @@
+scenario,window_packets,file_bytes,attempts,confirmed,completion_rate,mean_sender_seconds,mean_goodput_Bps,mean_retransmissions
+normal,1,1048576,3,3,1.0,0.048913028000000004,21681028.83592523,0
+normal,16,1048576,3,3,1.0,0.022453166333333385,47330499.150769815,0

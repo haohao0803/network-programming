@@ -1,0 +1,3 @@
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 tests/test_congestion.c src/congestion.c  -o build/test-congestion
+PASS congestion: RTT formula, Karn input, duplicate ACK, slow start, congestion avoidance, loss, persist, caps

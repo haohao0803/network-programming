@@ -1,0 +1,8 @@
+test_fin_uses_fixed_timer_after_data_backoff (__main__.AdaptiveSenderContracts.test_fin_uses_fixed_timer_after_data_backoff) ... ok
+test_noise_and_window_notifications_do_not_extend_deadline (__main__.AdaptiveSenderContracts.test_noise_and_window_notifications_do_not_extend_deadline) ... ok
+test_recovery_obeys_reduced_receive_window (__main__.AdaptiveSenderContracts.test_recovery_obeys_reduced_receive_window) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 9.291s
+
+OK

@@ -34,7 +34,7 @@ sudo apt-get install -y --no-install-recommends git
 ```sh
 mkdir -p ~/projects
 cd ~/projects
-git clone https://github.com/haohao0803/network-programming.git
+git clone --branch integration/file-transfer https://github.com/haohao0803/network-programming.git
 cd network-programming
 sudo sh scripts/server_setup.sh
 ```
@@ -48,10 +48,11 @@ sudo sh scripts/server_setup.sh
 ```sh
 make
 make check
+make check-integration
 sudo python3 scripts/check_server.py
 ```
 
-make check 检查默认网络中的本机 UDP 收发、非法端口与无响应超时。默认网络若有异常，仍可单独执行 check_server.py，看隔离网络中的行为。
+当前评审版本使用 integration/file-transfer，统一编译发送端和接收端。make check 检查探测、两端与日志功能；make check-integration 验证真实收发和故障处理。默认网络若有异常，仍可单独执行 check_server.py，看隔离网络中的行为。
 
 服务器检查脚本重新编译一个临时示例，然后创建临时网络命名空间，在其中检查以下项目。
 
@@ -85,7 +86,7 @@ sudo python3 scripts/check_server.py 2>&1 | tee "results/server-check-$(date +%Y
 
 ## 5. 团队使用与更新
 
-四个人使用 GitHub 分支与 PR 协作，部署账号负责更新已合并的 main。更新前检查服务器目录有无未提交工作。
+四个人使用 GitHub 分支与 PR 协作。当前先验证 integration/file-transfer，更新前检查服务器目录有无未提交工作；审阅合入 main 后再将部署分支切换为 main。
 
 ```sh
 git status --short

@@ -1,0 +1,11 @@
+{
+  "scenario": "zero-window-resume",
+  "bytes": 65549,
+  "sha256": "15546f9c62b72cbe7029f985025bacf7b178023d3e031e3194b778fdd2f451d3",
+  "sender_stdout": "PASS sender bytes=65549 chunks=65 retransmissions=0 probes=1 window=16 peak_inflight=8 elapsed_ms=10\n",
+  "sender_stderr": "",
+  "receiver_output": "READY 127.0.0.1:38402 pid=449\nWINDOW paused=1 base=0 window=0\nWINDOW paused=0 base=0 window=8\nPASS receiver bytes=65549 chunks=65 duplicates=1 peak_buffered=1\n",
+  "dropped": 0,
+  "sender_exit": 0,
+  "source_sha256": "15546f9c62b72cbe7029f985025bacf7b178023d3e031e3194b778fdd2f451d3"
+}

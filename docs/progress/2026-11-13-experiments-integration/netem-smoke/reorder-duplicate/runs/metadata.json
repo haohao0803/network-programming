@@ -1,0 +1,31 @@
+{
+  "started_utc": "2026-11-13T09:53:22.992599+00:00",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "git_commit": "f3717649b43ed597651700ebb474277ed306e3fb",
+  "git_status": "",
+  "sender_sha256": "a561c03e1fd48edad3d7afa7abd4a75086a776ff2f1a748c402a7bf1164ae029",
+  "receiver_sha256": "8d4d3b728d662a4443292f4cd24165345c313570377d3c70c55ccf12695cc289",
+  "source_sha256": "d960753708565a4be4ed40704005e0a364b490b0a5bfae8cf2a126e4ba6d6e7f",
+  "source_bytes": 1025,
+  "scenario": "reorder-duplicate",
+  "network_note": "Isolated Linux lo netem; see configuration.json",
+  "parameters": {
+    "sender": "/mnt/c/Users/29806/Downloads/\u7f51\u7edc\u7f16\u7a0b/network-programming/build/rudp-send",
+    "receiver": "/mnt/c/Users/29806/Downloads/\u7f51\u7edc\u7f16\u7a0b/network-programming/build/rudp-recv",
+    "file": "/mnt/c/Users/29806/Downloads/\u7f51\u7edc\u7f16\u7a0b/network-programming/results/experiments-integration-a5f31eb/fixtures/payload-1025.bin",
+    "output": "/mnt/c/Users/29806/Downloads/\u7f51\u7edc\u7f16\u7a0b/network-programming/results/netem-smoke-f371764/reorder-duplicate/runs",
+    "windows": [
+      1,
+      16
+    ],
+    "receive_window": 64,
+    "repeats": 1,
+    "timeout_ms": 1000,
+    "retries": 5,
+    "max_seconds": 20.0,
+    "scenario": "reorder-duplicate",
+    "network_note": "Isolated Linux lo netem; see configuration.json",
+    "keep_files": false
+  }
+}

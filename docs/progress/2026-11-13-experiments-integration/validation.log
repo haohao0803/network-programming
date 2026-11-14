@@ -1,0 +1,85 @@
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -O2 src/sender.c  -o build/rudp-send
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -O2 src/receiver.c  -o build/rudp-recv
+mkdir -p "/tmp"
+python3 scripts/check_probe.py ./build/udp-probe
+PASS UDP loopback round trip
+READY 127.0.0.1:49841
+PASS UDP loopback round trip
+PASS invalid port and silent-peer timeout
+mkdir -p "/tmp"
+python3 tests/test_sender.py ./build/rudp-send
+test_boundary_hashes (__main__.SenderTests.test_boundary_hashes) ... ok
+test_bounded_failures (__main__.SenderTests.test_bounded_failures) ... ok
+test_empty_file_with_zero_window (__main__.SenderTests.test_empty_file_with_zero_window) ... ok
+test_invalid_cli_and_files (__main__.SenderTests.test_invalid_cli_and_files) ... ok
+test_invalid_confirmations_do_not_advance_state (__main__.SenderTests.test_invalid_confirmations_do_not_advance_state) ... ok
+test_lost_confirmations_and_data (__main__.SenderTests.test_lost_confirmations_and_data) ... ok
+test_malformed_stale_and_foreign_packets (__main__.SenderTests.test_malformed_stale_and_foreign_packets) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 6.346s
+
+OK
+python3 tests/test_sender_window.py ./build/rudp-send
+test_changed_input_does_not_send_completion (__main__.WindowSenderTests.test_changed_input_does_not_send_completion) ... ok
+test_empty_and_boundary_files (__main__.WindowSenderTests.test_empty_and_boundary_files) ... ok
+test_gap_retransmission_and_window_shrink (__main__.WindowSenderTests.test_gap_retransmission_and_window_shrink) ... ok
+test_invalid_window_arguments (__main__.WindowSenderTests.test_invalid_window_arguments) ... ok
+test_multiple_inflight_and_both_window_limits (__main__.WindowSenderTests.test_multiple_inflight_and_both_window_limits) ... ok
+test_no_progress_is_bounded (__main__.WindowSenderTests.test_no_progress_is_bounded) ... ok
+test_reordering_duplicates_and_stale_window (__main__.WindowSenderTests.test_reordering_duplicates_and_stale_window) ... ok
+test_zero_window_probe_and_recovery (__main__.WindowSenderTests.test_zero_window_probe_and_recovery) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 3.110s
+
+OK
+python3 tests/test_sender_trace.py ./build/rudp-send
+test_existing_input_and_log_are_never_overwritten (__main__.TraceTests.test_existing_input_and_log_are_never_overwritten) ... ok
+test_lost_control_ack_trace (__main__.TraceTests.test_lost_control_ack_trace) ... ok
+test_success_and_zero_window_trace (__main__.TraceTests.test_success_and_zero_window_trace) ... ok
+test_trace_with_default_network_parameters (__main__.TraceTests.test_trace_with_default_network_parameters) ... ok
+test_trace_write_failure_is_reported (__main__.TraceTests.test_trace_write_failure_is_reported) ... ok
+test_unconfirmed_finish_is_failed_in_trace (__main__.TraceTests.test_unconfirmed_finish_is_failed_in_trace) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 1.169s
+
+OK
+mkdir -p "/tmp"
+python3 tests/test_receiver.py ./build/rudp-recv
+test_disappearing_peer_cleans_partial_file (__main__.ReceiverTests.test_disappearing_peer_cleans_partial_file) ... ok
+test_duplicate_start_and_conflicting_metadata_preserve_progress (__main__.ReceiverTests.test_duplicate_start_and_conflicting_metadata_preserve_progress) ... ok
+test_early_and_invalid_fin_do_not_publish (__main__.ReceiverTests.test_early_and_invalid_fin_do_not_publish) ... ok
+test_existing_target_and_invalid_parent_are_rejected (__main__.ReceiverTests.test_existing_target_and_invalid_parent_are_rejected) ... ok
+test_initial_zero_window_probes_and_recovery (__main__.ReceiverTests.test_initial_zero_window_probes_and_recovery) ... ok
+test_invalid_cli_and_occupied_port (__main__.ReceiverTests.test_invalid_cli_and_occupied_port) ... ok
+test_malformed_and_foreign_packets_preserve_session (__main__.ReceiverTests.test_malformed_and_foreign_packets_preserve_session) ... ok
+test_mid_transfer_zero_window_retains_cache_and_deduplicates_probes (__main__.ReceiverTests.test_mid_transfer_zero_window_retains_cache_and_deduplicates_probes) ... ok
+test_noise_duplicate_requests_and_signals_do_not_extend_idle_deadline (__main__.ReceiverTests.test_noise_duplicate_requests_and_signals_do_not_extend_idle_deadline) ... ok
+test_paused_empty_and_complete_files_still_finish (__main__.ReceiverTests.test_paused_empty_and_complete_files_still_finish) ... ok
+test_reordering_duplicates_and_window_span (__main__.ReceiverTests.test_reordering_duplicates_and_window_span) ... ok
+test_repeated_fin_is_confirmed_without_extending_linger (__main__.ReceiverTests.test_repeated_fin_is_confirmed_without_extending_linger) ... ok
+test_saved_file_hashes_and_boundary_lengths (__main__.ReceiverTests.test_saved_file_hashes_and_boundary_lengths) ... ok
+test_target_created_during_transfer_is_preserved (__main__.ReceiverTests.test_target_created_during_transfer_is_preserved) ... ok
+test_termination_cleans_partial_file (__main__.ReceiverTests.test_termination_cleans_partial_file) ... ok
+test_write_failure_reports_error_and_cleans_partial_file (__main__.ReceiverTests.test_write_failure_reports_error_and_cleans_partial_file) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 3.473s
+
+OK
+test_real_output_and_trace_agree (__main__.TraceTransferTests.test_real_output_and_trace_agree) ... PASS traced-transfer window=1 bytes=4097 sha256=b574ebff706803df9f0a526bdd804c9eba68c5006891005ed3221e4816db1aa6 rows=16
+PASS traced-transfer window=4 bytes=4097 sha256=b574ebff706803df9f0a526bdd804c9eba68c5006891005ed3221e4816db1aa6 rows=16
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.525s
+
+OK
+results/experiments-integration-a5f31eb/fixtures/manifest.json
+w1-r1 success=True sender_seconds=0.025167948999992973
+w16-r1 success=True sender_seconds=0.02480482400000028
+results/experiments-integration-a5f31eb/summary/summary.csv
