@@ -8,11 +8,11 @@ Reliable UDP File Transfer and Network Performance Evaluation
 
 ## 当前状态
 
-`integration/file-transfer` 整合 haohao0803 的发送端与 Clive-111 的正式接收端，支持停止等待、固定滑动窗口、累计 ACK、超时回退重传、乱序缓存、去重、文件保存和零窗口恢复。构建入口统一提供两端，发送端可记录 CSV 事件。
+`integration/file-transfer` 整合 haohao0803 的发送端、Clive-111 的接收端、LPCAQ 的自适应参数模块，以及 bushi510 的 Mac 修复和实验工具。支持停止等待、固定滑动窗口、累计 ACK、超时回退重传、乱序缓存、去重、文件保存和零窗口恢复；可用 `--adaptive` 启用自适应 RTT/RTO 与拥塞控制，并记录参数 CSV。
 
-两端真实文件联调已复跑；本整合版本的验证见 [集成记录](docs/progress/2026-11-13-integration.md)。自适应超时、拥塞控制、Mac/实际服务器验证及性能实验仍待完成。目标版本继续由组员审阅后再合入 main。
+固定及自适应模式已完成本机真实两端验证，Ubuntu/macOS CI 也已通过；范围见 [整合指南](docs/INTEGRATION.md) 和 [自适应集成记录](docs/progress/2026-11-13-adaptive-integration.md)。实际 VPS、跨机器验证、正式弱网/竞争流量实验及最终汇报仍待完成。目标版本继续由组员审阅后再合入 main。
 
-bushi510 已上传 Apple 兼容修复及其版本的 Mac 实测记录、测试文件和实验工具，见 [EXPERIMENTS.md](docs/EXPERIMENTS.md)。其 Mac 结果针对该记录中的源码；包含新增 CSV 功能的最新整合版本仍需 Mac 复跑，Linux 接入验证另行记录。
+bushi510 的实验工具已支持固定/自适应模式选择、独立参数日志、按模式分组及相应超时预算，见 [EXPERIMENTS.md](docs/EXPERIMENTS.md)。历史 Mac 实测记录与当前 CI 分别对应各自源码版本，不能代替实际跨机器验证或正式性能实验。
 
 目标申报 1.40 档，最终由老师认定。已收到用户提供的汇报要求截图，落实方式见 [汇报要求记录](docs/PRESENTATION.md)；正式截止时间仍待确认。
 
@@ -30,8 +30,8 @@ bushi510 已上传 Apple 兼容修复及其版本的 Mac 实测记录、测试�
 
 | 成员 | 环境 | 主责 |
 | --- | --- | --- |
-| [haohao0803](https://github.com/haohao0803) | Windows / WSL 2 Ubuntu | 发送端、发送窗口、ACK 处理、重传调度、项目集成 |
-| [Clive-111](https://github.com/Clive-111) | Windows / WSL 2 Ubuntu | 接收端、乱序缓存、去重、文件重组、流量控制 |
+| [haohao0803](https://github.com/haohao0803) | Windows / WSL 2 Ubuntu | 组长；发送端、发送窗口、ACK 处理、重传调度、项目集成 |
+| [Clive-111](https://github.com/Clive-111) | Windows / WSL 2 Ubuntu | 接收端、乱序缓存、去重、文件重组、流量控制；VPS 所有人，负责部署和预检 |
 | [LPCAQ](https://github.com/LPCAQ) | Windows / WSL 2 Ubuntu | RTT/RTO、拥塞控制、参数日志 |
 | [bushi510](https://github.com/bushi510) | macOS | 测试工具、实验自动化、图表、Mac 兼容性验证 |
 
@@ -48,6 +48,8 @@ make
 make check
 # 真实 C 两端的故障注入联调，约需一分钟
 make check-integration
+# 自适应参数、发送端边界及真实两端验证
+make check-adaptive
 ```
 
 手动运行时，先在一个终端启动接收端，再在另一终端发送。
@@ -75,7 +77,7 @@ sha256sum input.bin outputs/received.bin
 
 发送端仅支持数字 IPv4 和不超过 1 GiB 的普通文件。传输期间保持源文件不变。退出码 0 表示获得完成确认且所请求日志保存成功，1 表示传输或日志运行错误（stderr 区分是否已获得完成确认），2 表示参数、输入文件或日志创建错误。窗口上限为 1–256 个分片，缓存按上限分配，接收窗口进一步限制发送范围。默认超时 1 秒、额外重试 5 次；新累计确认会重置连续失败预算，重复 ACK 和窗口更新不延长等待。零窗口期间使用重复 START 或已确认 DATA 探测，连续无进展后失败。
 
-当前为固定超时、固定窗口的实验基线；LPCAQ 的计时与拥塞模块接入后，发送上限还会受 cwnd 约束。完整行为及接收端配合要求见 [协议草案](docs/PROTOCOL.md)。
+默认固定超时、固定窗口作为实验基线；`--adaptive` 模式的发送上限还受 cwnd 约束，DATA 使用自适应 RTO，START/FIN 保持固定计时。运行预算与参数日志见 [CONGESTION.md](docs/CONGESTION.md)。完整协议及接收端配合要求见 [协议草案](docs/PROTOCOL.md)。
 
 ## 开发资料
 

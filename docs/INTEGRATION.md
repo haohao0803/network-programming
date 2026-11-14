@@ -57,7 +57,7 @@ macOS 用 `shasum -a 256`。接收端默认等待上限为 15 秒，成功保存
 ./build/rudp-send 127.0.0.1 19090 results/input.bin 1000 2 16 --adaptive --trace results/adaptive-new.csv
 ```
 
-120 s idle 仅为此示例配置，不保证任意 RTO/重试组合；按 CONGESTION.md 的退避上界调整。完成保留期仍依据 START/FIN 固定计时配置。现有批量脚本尚未启用自适应模式，等待实验负责人增加模式选择和日志采集。
+120 s idle 仅为此示例配置，不保证任意 RTO/重试组合；按 CONGESTION.md 的退避上界调整。完成保留期仍依据 START/FIN 固定计时配置。bushi510 在 PR #6 补充批量脚本 `--modes fixed adaptive`、独立参数日志和模式分组；脚本采用更保守的接收端预算，完整选项与限制见 [EXPERIMENTS.md](EXPERIMENTS.md)。
 
 ## 记录与剩余工作
 

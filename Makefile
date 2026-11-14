@@ -21,7 +21,11 @@ build/udp-probe: src/udp_probe.c
 	mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(LDFLAGS) -o $@
 
-check: check-probe check-sender check-receiver check-congestion
+check: check-probe check-sender check-receiver check-congestion check-experiments
+
+.PHONY: check-experiments
+check-experiments: build/rudp-send build/rudp-recv
+	$(PYTHON) tests/test_experiments.py
 
 .PHONY: check-congestion check-adaptive
 build/test-congestion: tests/test_congestion.c src/congestion.c src/congestion.h
