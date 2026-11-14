@@ -26,6 +26,7 @@ check: check-probe check-sender check-receiver check-congestion check-experiment
 .PHONY: check-experiments
 check-experiments: build/rudp-send build/rudp-recv
 	$(PYTHON) tests/test_experiments.py
+	$(PYTHON) tests/test_formal_experiments.py
 
 .PHONY: check-congestion check-adaptive
 build/test-congestion: tests/test_congestion.c src/congestion.c src/congestion.h

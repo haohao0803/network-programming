@@ -33,6 +33,7 @@ def main():
     p.add_argument('--timeout-ms', type=int, default=1000)
     p.add_argument('--retries', type=int, default=5)
     p.add_argument('--inside', action='store_true', help=argparse.SUPPRESS)
+    p.add_argument('--keep-files', action='store_true')
     a = p.parse_args()
     if platform.system() != 'Linux' or os.geteuid() != 0:
         p.error('Run on Linux with sudo; Mac cannot validate Linux netem.')
@@ -54,6 +55,8 @@ def main():
     time_options = (['--max-seconds', str(a.max_seconds)] if a.max_seconds is not None else [])
     mode_options = ['--timeout-ms', str(a.timeout_ms), '--retries', str(a.retries),
                     '--modes', *a.modes, *time_options]
+    if a.keep_files:
+        mode_options.append('--keep-files')
     source = a.file.resolve(strict=True)
     output = a.output.resolve()
     if not a.inside:

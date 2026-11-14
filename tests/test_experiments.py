@@ -34,7 +34,7 @@ class ExperimentTests(unittest.TestCase):
             source.write_bytes(b'hello')
             argv = ['netem', '--file', str(source), '--output', str(Path(directory) / 'out'),
                     '--modes', 'fixed', 'adaptive', '--timeout-ms', '2000', '--retries', '2',
-                    '--max-seconds', '1801']
+                    '--max-seconds', '1801', '--keep-files']
             with patch.object(sys, 'argv', argv), patch.object(run_netem.platform, 'system', return_value='Linux'), \
                     patch.object(run_netem.os, 'geteuid', return_value=0), \
                     patch.object(run_netem.shutil, 'which', return_value='/tool'), \
@@ -46,6 +46,7 @@ class ExperimentTests(unittest.TestCase):
                 self.assertEqual(command[command.index(flag) + 1], value)
             i = command.index('--modes')
             self.assertEqual(command[i + 1:i + 3], ['fixed', 'adaptive'])
+            self.assertIn('--keep-files', command)
 
     def test_invalid_adaptive_config_fails_before_creating_results(self):
         with tempfile.TemporaryDirectory() as directory:
