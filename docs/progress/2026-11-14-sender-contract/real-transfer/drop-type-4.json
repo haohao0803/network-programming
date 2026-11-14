@@ -1,0 +1,11 @@
+{
+  "scenario": "drop-type-4",
+  "bytes": 65549,
+  "sha256": "15546f9c62b72cbe7029f985025bacf7b178023d3e031e3194b778fdd2f451d3",
+  "sender_stdout": "PASS sender bytes=65549 chunks=65 retransmissions=1 probes=0 window=1 peak_inflight=1 elapsed_ms=1051\n",
+  "sender_stderr": "timeout DATA base=0 next=1 window=8 retry=1/2\n",
+  "receiver_output": "READY 127.0.0.1:41556 pid=505\nPASS receiver bytes=65549 chunks=65 duplicates=1 peak_buffered=1\n",
+  "dropped": 1,
+  "sender_exit": 0,
+  "source_sha256": "15546f9c62b72cbe7029f985025bacf7b178023d3e031e3194b778fdd2f451d3"
+}

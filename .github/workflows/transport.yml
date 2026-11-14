@@ -26,6 +26,7 @@ jobs:
         shell: bash
         env:
           RUDP_ADAPTIVE_EVIDENCE: results/adaptive
+          RUDP_SENDER_CONTRACT_EVIDENCE: results/sender-contract
         run: |
           set -o pipefail
           make check-adaptive CFLAGS='-std=c11 -Wall -Wextra -Wpedantic -Werror -O2' 2>&1 | tee results/adaptive.log

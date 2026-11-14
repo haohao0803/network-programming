@@ -34,6 +34,7 @@ check-congestion: build/test-congestion
 check-adaptive: build/rudp-send build/rudp-recv check-congestion
 	mkdir -p "$(TMPDIR)"
 	$(PYTHON) tests/test_adaptive.py ./build/rudp-send
+	$(PYTHON) tests/test_adaptive_sender_contract.py ./build/rudp-send
 	$(PYTHON) tests/test_adaptive_transfer.py ./build/rudp-send ./build/rudp-recv
 
 check-probe: build/udp-probe

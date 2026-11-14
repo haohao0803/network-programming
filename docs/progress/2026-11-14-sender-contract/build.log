@@ -1,0 +1,6 @@
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/udp_probe.c  -o build/udp-probe
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/sender.c src/congestion.c  -o build/rudp-send
+mkdir -p build
+cc  -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 src/receiver.c  -o build/rudp-recv
