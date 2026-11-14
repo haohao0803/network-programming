@@ -1,5 +1,8 @@
 # 测试、Mac 验证与实验复跑
 
+正式重复矩阵、veth/HTB 竞争流量、完整原始数据归档及统计图表见
+[FORMAL_EXPERIMENTS.md](FORMAL_EXPERIMENTS.md)。已有单次 netem 预跑仅用于接入验证。
+
 ## 固定与自适应模式（2026-11-14）
 
 基于 `integration/file-transfer` 的自适应发送端，批量入口新增 `--modes`。

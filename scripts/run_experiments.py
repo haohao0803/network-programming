@@ -121,10 +121,12 @@ def run(args):
                         port = picker.getsockname()[1]
                     linger = budget['receiver_linger_ms']
                     trace = (args.output / (name + '.parameters.csv')).resolve()
-                    receiver_cmd = [str(args.receiver.resolve()), '127.0.0.1', str(port),
+                    receiver_cmd = [str(args.receiver.resolve()), args.receiver_bind, str(port),
                                     str(target), str(args.receive_window),
                                     str(budget['receiver_idle_ms']), str(linger)]
-                    sender_cmd = [str(args.sender.resolve()), '127.0.0.1', str(port),
+                    if args.receiver_netns_pid is not None:
+                        receiver_cmd = ['nsenter', '-t', str(args.receiver_netns_pid), '-n', '--', *receiver_cmd]
+                    sender_cmd = [str(args.sender.resolve()), args.host, str(port),
                                   str(source), str(args.timeout_ms), str(args.retries), str(window)]
                     if mode == 'adaptive':
                         sender_cmd.append('--adaptive')
@@ -147,10 +149,12 @@ def run(args):
                                                         stderr=subprocess.STDOUT)
                             ready(receiver, recv_log)
                             start = time.monotonic()
+                            record['sender_started_monotonic_s'] = start
                             stage = 'sender'
                             sender = subprocess.run(sender_cmd, capture_output=True, text=True,
                                                     timeout=budget['max_seconds'])
                             record['sender_seconds'] = time.monotonic() - start
+                            record['sender_finished_monotonic_s'] = time.monotonic()
                             record['sender_exit'] = sender.returncode
                             output, error = sender.stdout, sender.stderr
                             stage = 'receiver_finish'
@@ -223,7 +227,17 @@ def main():
     parser.add_argument('--scenario', default='normal')
     parser.add_argument('--network-note', default='Unmodified local loopback; not a WAN benchmark')
     parser.add_argument('--keep-files', action='store_true')
+    parser.add_argument('--host', default='127.0.0.1', help='Receiver numeric IPv4')
+    parser.add_argument('--receiver-bind', default='127.0.0.1')
+    parser.add_argument('--receiver-netns-pid', type=int, help='Linux namespace holder PID')
     args = parser.parse_args()
+    try:
+        socket.inet_pton(socket.AF_INET, args.host)
+        socket.inet_pton(socket.AF_INET, args.receiver_bind)
+    except OSError:
+        parser.error('host and receiver-bind must be numeric IPv4')
+    if args.receiver_netns_pid is not None and args.receiver_netns_pid <= 0:
+        parser.error('receiver-netns-pid must be positive')
     if (not all(1 <= w <= 256 for w in args.windows) or
             not 1 <= args.receive_window <= 256 or args.repeats < 1 or
             not 10 <= args.timeout_ms <= 10000 or not 0 <= args.retries <= 20 or

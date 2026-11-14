@@ -1,0 +1,29 @@
+python3 tests/test_experiments.py
+test_adaptive_silence_and_control_budgets (__main__.ExperimentTests) ... ok
+test_invalid_adaptive_config_fails_before_creating_results (__main__.ExperimentTests) ... ok
+test_netem_forwards_modes_and_timeout_through_namespace (__main__.ExperimentTests) ... ok
+test_real_modes_save_separate_parameter_logs_and_hashes (__main__.ExperimentTests) ... ok
+test_summary_separates_modes_and_supports_legacy_records (__main__.ExperimentTests) ... ok
+test_trace_schema_and_empty_or_malformed_logs (__main__.ExperimentTests) ... ok
+test_wall_timeout_is_saved_as_failure (__main__.ExperimentTests) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 8.350s
+
+OK
+python3 tests/test_formal_experiments.py
+test_competition_namespace_boundary (__main__.FormalTests) ... usage: competition [-h] --file FILE --output OUTPUT --mode {fixed,adaptive}
+                   --load-mbps {0,7,12} --seed SEED
+competition: error: refusing changes in PID 1 network namespace
+ok
+test_default_schedule_and_paired_independent_seeds (__main__.FormalTests) ... ok
+test_paced_udp_generator_and_sink_keep_raw_counters (__main__.FormalTests) ... ok
+test_partial_data_and_parameter_tampering_are_detected (__main__.FormalTests) ... ok
+test_plan_is_not_a_measured_result_and_formal_minimum (__main__.FormalTests) ... ok
+test_raw_archive_keeps_files_hashes_and_rejects_active_snapshot (__main__.FormalTests) ... ok
+test_statistics_retain_failures_and_suppress_single_sample_interval (__main__.FormalTests) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.635s
+
+OK
