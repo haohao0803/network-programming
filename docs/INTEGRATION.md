@@ -71,4 +71,4 @@ RUDP_RESULTS_JSON=results/integration.json RUDP_TRACE_RESULTS_DIR=results/traces
 
 LPCAQ 的自适应 RTO/退避/cwnd 已提供并进入本整合分支；完成状态以随版本保存的验证证据为准。bushi510 的正式批量性能实验、最新组合的跨平台检查、实际服务器/跨机器验证和最终汇报仍待完成。测试包装和构建调整属于 haohao0803 的集成工作。
 
-11-14 本人新增自适应发送端边界检查，覆盖持续无进展通知、异常 ACK、丢包后缩窗及 DATA 退避后的 FIN 固定计时，已纳入 `make check-adaptive`；范围、原始证据与交接文字见 [发送端边界验收](progress/2026-11-14-sender-contract.md)。
+11-14 本人新增自适应发送端边界检查，覆盖持续无进展通知、异常 ACK、丢包后缩窗及 DATA 退避后的 FIN 固定计时，已纳入 `make check-adaptive`；原始验证日志见 [发送端边界验收结果](progress/2026-11-14-sender-contract/adaptive-validation.log)。
