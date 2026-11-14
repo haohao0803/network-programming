@@ -6,6 +6,7 @@ This is an initial loopback experiment, not a bandwidth-contention/cwnd benchmar
 """
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -27,15 +28,32 @@ def main():
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--seed', type=int, default=20261113)
     p.add_argument('--repeats', type=int, default=3)
-    p.add_argument('--max-seconds', type=float, default=600)
+    p.add_argument('--max-seconds', type=float, default=None)
+    p.add_argument('--modes', nargs='+', choices=['fixed', 'adaptive'], default=['fixed'])
+    p.add_argument('--timeout-ms', type=int, default=1000)
+    p.add_argument('--retries', type=int, default=5)
     p.add_argument('--inside', action='store_true', help=argparse.SUPPRESS)
     a = p.parse_args()
     if platform.system() != 'Linux' or os.geteuid() != 0:
         p.error('Run on Linux with sudo; Mac cannot validate Linux netem.')
-    if not 1 <= a.seed <= 4294967295 or a.repeats < 1 or a.max_seconds <= 0:
+    if not 1 <= a.seed <= 4294967295 or a.repeats < 1 or (a.max_seconds is not None and
+            (not math.isfinite(a.max_seconds) or a.max_seconds <= 0)):
         p.error('seed/repeats/max-seconds out of range')
     if not all(shutil.which(tool) for tool in ('unshare', 'ip', 'tc', 'ping')):
         p.error('Need unshare, ip, tc and ping (iputils-ping on Debian/Ubuntu).')
+    from run_experiments import timing
+    try:
+        for mode in a.modes:
+            if mode == 'adaptive' and a.timeout_ms < 1000:
+                raise ValueError('adaptive initial RTO must be >=1000ms')
+            if not 10 <= a.timeout_ms <= 10000 or not 0 <= a.retries <= 20:
+                raise ValueError('invalid initial RTO or retries')
+            timing(mode, a.timeout_ms, a.retries, a.max_seconds)
+    except ValueError as exc:
+        p.error(str(exc))
+    time_options = (['--max-seconds', str(a.max_seconds)] if a.max_seconds is not None else [])
+    mode_options = ['--timeout-ms', str(a.timeout_ms), '--retries', str(a.retries),
+                    '--modes', *a.modes, *time_options]
     source = a.file.resolve(strict=True)
     output = a.output.resolve()
     if not a.inside:
@@ -45,7 +63,7 @@ def main():
         return subprocess.call(['unshare', '--net', sys.executable, str(Path(__file__).resolve()),
                                 '--inside', '--file', str(source), '--output', str(output),
                                 '--seed', str(a.seed), '--repeats', str(a.repeats),
-                                '--max-seconds', str(a.max_seconds)])
+                                *mode_options])
     # Even an accidental direct --inside invocation cannot change the host netns.
     if os.readlink('/proc/self/ns/net') == os.readlink('/proc/1/ns/net'):
         p.error('Refusing network changes in PID 1 network namespace')
@@ -63,7 +81,7 @@ def main():
         scenario.mkdir()
         (scenario / 'configuration.json').write_text(json.dumps({
             'topology': 'Both C endpoints in one isolated Linux network namespace on lo',
-            'qdisc_command': command, 'seed': a.seed,
+            'qdisc_command': command, 'seed': a.seed, 'modes': a.modes,
             'kernel': platform.release(),
             'note': 'qdisc applies to requests and replies; 50ms per packet gives about 100ms RTT. '
                     'Seed does not make process scheduling or packet order identical.'}, indent=2) + '\n')
@@ -86,7 +104,7 @@ def main():
                                     '--receiver', str(root / 'build/rudp-recv'),
                                     '--file', str(source), '--output', str(scenario / 'runs'),
                                     '--scenario', label, '--repeats', str(a.repeats),
-                                    '--max-seconds', str(a.max_seconds),
+                                    *mode_options,
                                     '--network-note', 'Isolated Linux lo netem; see configuration.json'],
                                    stdout=log, stderr=subprocess.STDOUT)
                 failed = failed or r.returncode != 0

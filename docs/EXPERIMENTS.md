@@ -1,5 +1,56 @@
 # 测试、Mac 验证与实验复跑
 
+## 固定与自适应模式（2026-11-14）
+
+基于 `integration/file-transfer` 的自适应发送端，批量入口新增 `--modes`。
+默认仅 `fixed`，保持原有实验规模；可选 `adaptive` 或同时比较两种模式：
+
+```sh
+make all
+python3 scripts/run_experiments.py \
+  --file test-data/demo/payload-1048576.bin --output results/modes-new \
+  --modes fixed adaptive --windows 1 16 --repeats 3 --timeout-ms 1000 --retries 5
+python3 scripts/summarize_results.py results/modes-new/runs.jsonl \
+  --output results/modes-summary-new
+```
+
+固定模式不传 `--adaptive`，自适应模式传入该标志。两者均传 `--trace`，每次保存独立的
+`MODE-wN-rN.parameters.csv`。固定模式为 schema 1，自适应模式为 schema 2，增加
+RTT/SRTT/RTTVAR（ms）、cwnd/ssthresh/effective window（分片）等字段。
+JSONL 记录模式、日志相对路径、行数、schema 和 SHA-256；缺失、空或非法日志会使该次
+实验判为失败，原始文件保留。失败和墙钟超时也会记录，超时单独标记发生阶段。
+
+CSV 和 SVG 按模式、场景、窗口、文件大小分组；没有 mode 的历史记录按 fixed 解释。
+比较实验应保持文件、接收窗口、链路和超时配置一致，不把不同模式结果混合求均值。
+
+超时单位与预算：
+
+- 固定模式默认每次发送进程上限 600 秒，自适应模式默认 1800 秒；
+  `--max-seconds` 可显式覆盖，适合小规模预跑或设置整次传输上限。
+- 自适应初始 RTO 必须为 1000–10000 ms；DATA RTO 后续可增长至 60000 ms。
+  接收端无进展期限至少为 `(retries+1)*60000+1000` ms，默认 361000 ms，
+  以覆盖已经退避到上限后的完整连续无进展预算。
+- 接收端最多支持 600000 ms 无进展期限，所以 adaptive 要求 retries <= 8；
+  超限在创建结果目录前报错，不静默截断预算。
+- START/FIN 仍用固定控制报文超时，所以 FIN 保留期保持
+  `(retries+1)*timeout_ms+1000` ms，默认 7000 ms。
+- 默认进程上限还保证不小于 DATA 无进展预算加两段控制预算及 30 秒余量。
+  多次获得进展的长传输仍可能超过整次上限，需要按文件大小/链路调整。
+
+Linux 入口同样透传上述选项：
+
+```sh
+sudo python3 scripts/run_netem.py \
+  --file test-data/demo/payload-1048576.bin --output results/netem-modes-new \
+  --modes fixed adaptive --timeout-ms 1000 --retries 5 --max-seconds 1800
+```
+
+默认单模式仍为 24 次；两模式均选时为 48 次。
+`make check-experiments` 检查分组、旧数据兼容、参数日志、预算边界、netem 参数透传、
+真实两端的四种 mode/window 组合及强制墙钟超时；已接入 `make check`。
+
+以下 11 月 13 日记录描述此前固定模式基线，未更新历史实测结论。
+
 本分支整合发送端 `b3a4b452c3510da9e13a0621b91dce9eec056097` 与 Clive 接收端
 `2f2613a2eb38cd9ac1d1bd6d67ff69689cef5eaf`。保留两人的 Git 历史，协议不变。
 Mac 兼容修复仅在 Apple 平台启用 `_DARWIN_C_SOURCE`，使严格 POSIX 模式下
